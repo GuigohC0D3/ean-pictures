@@ -1,0 +1,18 @@
+# Ambiente / segredos
+.env
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Dados gerados em runtime
+data/history.json
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

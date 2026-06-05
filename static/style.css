@@ -1,0 +1,335 @@
+/* ------------------------------------------------------------------ *
+ * EAN Pictures — estilos
+ * Design moderno, responsivo (mobile-first) e com tema escuro suave.
+ * ------------------------------------------------------------------ */
+
+:root {
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --bg-soft: #273449;
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --danger: #f87171;
+  --success: #34d399;
+  --radius: 16px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 60%);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+.app {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+/* Cabeçalho */
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+.header p {
+  color: var(--text-dim);
+  margin-top: 0.25rem;
+}
+
+/* Card de busca */
+.search-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 1.5rem;
+}
+#search-form {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+#ean-input {
+  flex: 1 1 240px;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: var(--bg-soft);
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+#ean-input:focus {
+  border-color: var(--primary);
+}
+#provider-select {
+  flex: 0 1 180px;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: var(--bg-soft);
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+#provider-select:focus {
+  border-color: var(--primary);
+}
+#search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 160px;
+  padding: 0.9rem 1.4rem;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.05s;
+}
+#search-btn:hover {
+  background: var(--primary-hover);
+}
+#search-btn:active {
+  transform: scale(0.98);
+}
+#search-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.hint {
+  margin-top: 0.75rem;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+/* Spinner de carregamento */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mensagens de status / erro */
+.message {
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+.message.error {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+.message.info {
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid var(--primary);
+  color: var(--text);
+}
+
+/* Layout principal: produto + histórico */
+.content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+@media (min-width: 820px) {
+  .content {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+}
+
+/* Card do produto */
+.product-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: fade-in 0.3s ease;
+}
+@media (min-width: 560px) {
+  .product-card {
+    flex-direction: row;
+  }
+}
+.product-image {
+  flex: 0 0 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  min-height: 220px;
+}
+.product-image img {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+}
+.product-info {
+  flex: 1;
+}
+.product-info h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+.product-ean {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+.product-description {
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+.product-extra {
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+.product-extra li {
+  background: var(--bg-soft);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+.product-extra li span {
+  color: var(--text-dim);
+}
+.product-source {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+/* Histórico */
+.history {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+}
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.history-header h3 {
+  font-size: 1.05rem;
+}
+.clear-btn {
+  border: 1px solid #334155;
+  background: var(--bg-soft);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.clear-btn:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.clear-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+#history-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.history-item:hover {
+  background: var(--bg-soft);
+}
+.history-item img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 8px;
+  flex: 0 0 auto;
+}
+.history-item strong {
+  display: block;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.history-item small {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+.history-empty {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+/* Rodapé */
+.footer {
+  text-align: center;
+  margin-top: 2.5rem;
+  color: var(--text-dim);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

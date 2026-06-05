@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EAN Pictures — Busca de Produtos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>EAN Pictures</h1>
+      <p>Digite um código de barras e veja os dados e a imagem do produto.</p>
+    </header>
+
+    <!-- Formulário de busca -->
+    <section class="search-card">
+      <form id="search-form" autocomplete="off">
+        <input
+          type="text"
+          id="ean-input"
+          inputmode="numeric"
+          placeholder="Ex.: 7891000100103"
+          aria-label="Código EAN"
+        />
+        <select id="provider-select" aria-label="Fonte de consulta">
+          <option value="auto">Todas (cascata)</option>
+          <option value="gtin">RSC GTIN</option>
+          <option value="openfoodfacts">Open Food Facts</option>
+          <option value="upcitemdb">UPCitemdb</option>
+          <option value="cosmos">Bluesoft Cosmos</option>
+          <option value="ean-db">EAN-DB</option>
+          <option value="ean-search">EAN-Search</option>
+        </select>
+        <button type="submit" id="search-btn">
+          <span class="btn-label">Buscar Produto</span>
+          <span class="spinner" id="spinner" hidden></span>
+        </button>
+      </form>
+      <p class="hint">Aceita EAN-8, EAN-13, UPC-A (12) e GTIN-14.</p>
+    </section>
+
+    <!-- Área de mensagens (erros / status) -->
+    <div id="message" class="message" hidden></div>
+
+    <main class="content">
+      <!-- Card do produto -->
+      <section id="product-card" class="product-card" hidden>
+        <div class="product-image">
+          <img id="product-img" src="" alt="Imagem do produto" />
+        </div>
+        <div class="product-info">
+          <h2 id="product-name"></h2>
+          <p class="product-ean">EAN: <span id="product-ean"></span></p>
+          <p id="product-description" class="product-description"></p>
+          <ul id="product-extra" class="product-extra"></ul>
+          <span id="product-source" class="product-source"></span>
+        </div>
+      </section>
+
+      <!-- Histórico -->
+      <aside class="history">
+        <div class="history-header">
+          <h3>Últimas consultas</h3>
+          <button type="button" id="clear-history-btn" class="clear-btn" title="Limpar histórico">
+            Limpar
+          </button>
+        </div>
+        <ul id="history-list">
+          {% for item in history %}
+          <li class="history-item" data-ean="{{ item.ean }}">
+            <img src="{{ item.image or '' }}" alt="" onerror="this.style.visibility='hidden'" />
+            <div>
+              <strong>{{ item.name }}</strong>
+              <small>{{ item.ean }} · {{ item.timestamp }}</small>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        <p id="history-empty" class="history-empty" {% if history %}hidden{% endif %}>
+          Nenhuma consulta ainda.
+        </p>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <small>Projeto demonstrativo · Flask + Requests · API EAN Pictures</small>
+    </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
