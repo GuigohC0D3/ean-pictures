@@ -1,332 +1,66 @@
 # Relatório — `upcitemdb`
 
-_Gerado em 05/06/2026 12:32 por `tests/benchmark.py`._
+_Gerado em 08/06/2026 11:32 por `tests/benchmark.py`._
 
 ## Resumo
 
-- **Encontrados:** 3/316
-- **Com imagem:** 0/316  (**0%**) ← métrica principal
-- **Latência média:** 388 ms
+- **Encontrados:** 0/50
+- **Com imagem:** 0/50  (**0%**) ← métrica principal
+- **Latência média:** 382 ms
 
-> ⚠️ **245/316 consultas tomaram HTTP 429 (rate limit).** Os números estão subestimados; rode mais tarde para um resultado limpo.
+> ⚠️ **30/50 consultas tomaram HTTP 429 (rate limit).** Os números estão subestimados; rode mais tarde para um resultado limpo.
 
 ## Detalhe por EAN
 
 | EAN | Produto | Categoria | Status | Imagem | Latência | Nome retornado |
 |-----|---------|-----------|--------|--------|----------|----------------|
-| 7896007550906 | PDF #1 | PDF | ❌ NAO_ENCONTRADO | — | 820 ms |  |
-| 7896007550890 | PDF #2 | PDF | ❌ NAO_ENCONTRADO | — | 393 ms |  |
-| 7896007544059 | PDF #3 | PDF | ❌ NAO_ENCONTRADO | — | 354 ms |  |
-| 7896007544042 | PDF #4 | PDF | ❌ NAO_ENCONTRADO | — | 394 ms |  |
-| 7896004708706 | PDF #5 | PDF | ❌ NAO_ENCONTRADO | — | 404 ms |  |
-| 7896004715292 | PDF #6 | PDF | ❌ NAO_ENCONTRADO | — | 666 ms |  |
-| 7896004713366 | PDF #7 | PDF | ❌ NAO_ENCONTRADO | — | 409 ms |  |
-| 7896004713342 | PDF #8 | PDF | ❌ NAO_ENCONTRADO | — | 409 ms |  |
-| 7896004710891 | PDF #9 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7891142115492 | PDF #10 | PDF | ⚠️ INDISPONIVEL | — | 339 ms | A API retornou erro HTTP 429. |
-| 7891058002589 | PDF #11 | PDF | ⚠️ INDISPONIVEL | — | 358 ms | A API retornou erro HTTP 429. |
-| 7891058004354 | PDF #12 | PDF | ⚠️ INDISPONIVEL | — | 349 ms | A API retornou erro HTTP 429. |
-| 7891058004347 | PDF #13 | PDF | ⚠️ INDISPONIVEL | — | 396 ms | A API retornou erro HTTP 429. |
-| 7896523207681 | PDF #14 | PDF | ⚠️ INDISPONIVEL | — | 386 ms | A API retornou erro HTTP 429. |
-| 7896523207667 | PDF #15 | PDF | ⚠️ INDISPONIVEL | — | 378 ms | A API retornou erro HTTP 429. |
-| 7896523207636 | PDF #16 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7896523207643 | PDF #17 | PDF | ❌ NAO_ENCONTRADO | — | 336 ms |  |
-| 7891058021740 | PDF #18 | PDF | ❌ NAO_ENCONTRADO | — | 375 ms |  |
-| 7891058021665 | PDF #19 | PDF | ❌ NAO_ENCONTRADO | — | 339 ms |  |
-| 7501843502926 | PDF #20 | PDF | ❌ NAO_ENCONTRADO | — | 362 ms |  |
-| 7891106916653 | PDF #21 | PDF | ❌ NAO_ENCONTRADO | — | 355 ms |  |
-| 7891106916660 | PDF #22 | PDF | ❌ NAO_ENCONTRADO | — | 379 ms |  |
-| 7891106916684 | PDF #23 | PDF | ⚠️ INDISPONIVEL | — | 381 ms | A API retornou erro HTTP 429. |
-| 7891106916639 | PDF #24 | PDF | ⚠️ INDISPONIVEL | — | 338 ms | A API retornou erro HTTP 429. |
-| 7896045115709 | PDF #25 | PDF | ⚠️ INDISPONIVEL | — | 372 ms | A API retornou erro HTTP 429. |
-| 7896045115686 | PDF #26 | PDF | ⚠️ INDISPONIVEL | — | 396 ms | A API retornou erro HTTP 429. |
-| 7896094210127 | PDF #27 | PDF | ⚠️ INDISPONIVEL | — | 379 ms | A API retornou erro HTTP 429. |
-| 7896094904682 | PDF #28 | PDF | ⚠️ INDISPONIVEL | — | 394 ms | A API retornou erro HTTP 429. |
-| 7896094918597 | PDF #29 | PDF | ⚠️ INDISPONIVEL | — | 348 ms | A API retornou erro HTTP 429. |
-| 7896094931541 | PDF #30 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
-| 7896523210797 | PDF #31 | PDF | ⚠️ INDISPONIVEL | — | 356 ms | A API retornou erro HTTP 429. |
-| 7891058021610 | PDF #32 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7896026301374 | PDF #33 | PDF | ❌ NAO_ENCONTRADO | — | 337 ms |  |
-| 7891058021627 | PDF #34 | PDF | ❌ NAO_ENCONTRADO | — | 342 ms |  |
-| 7897947620933 | PDF #35 | PDF | ❌ NAO_ENCONTRADO | — | 378 ms |  |
-| 7897947620957 | PDF #36 | PDF | ❌ NAO_ENCONTRADO | — | 337 ms |  |
-| 7897947620940 | PDF #37 | PDF | ❌ NAO_ENCONTRADO | — | 339 ms |  |
-| 7896004720241 | PDF #38 | PDF | ❌ NAO_ENCONTRADO | — | 360 ms |  |
+| 7896007550906 | PDF #1 | PDF | ❌ NAO_ENCONTRADO | — | 561 ms |  |
+| 7896007550890 | PDF #2 | PDF | ❌ NAO_ENCONTRADO | — | 377 ms |  |
+| 7896007544059 | PDF #3 | PDF | ❌ NAO_ENCONTRADO | — | 345 ms |  |
+| 7896007544042 | PDF #4 | PDF | ❌ NAO_ENCONTRADO | — | 347 ms |  |
+| 7896004708706 | PDF #5 | PDF | ❌ NAO_ENCONTRADO | — | 382 ms |  |
+| 7896004715292 | PDF #6 | PDF | ❌ NAO_ENCONTRADO | — | 375 ms |  |
+| 7896004713366 | PDF #7 | PDF | ⚠️ INDISPONIVEL | — | 425 ms | A API retornou erro HTTP 429. |
+| 7896004713342 | PDF #8 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
+| 7896004710891 | PDF #9 | PDF | ⚠️ INDISPONIVEL | — | 379 ms | A API retornou erro HTTP 429. |
+| 7891142115492 | PDF #10 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
+| 7891058002589 | PDF #11 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
+| 7891058004354 | PDF #12 | PDF | ⚠️ INDISPONIVEL | — | 377 ms | A API retornou erro HTTP 429. |
+| 7891058004347 | PDF #13 | PDF | ⚠️ INDISPONIVEL | — | 362 ms | A API retornou erro HTTP 429. |
+| 7896523207681 | PDF #14 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
+| 7896523207667 | PDF #15 | PDF | ⚠️ INDISPONIVEL | — | 397 ms | A API retornou erro HTTP 429. |
+| 7896523207636 | PDF #16 | PDF | ⚠️ INDISPONIVEL | — | 340 ms | A API retornou erro HTTP 429. |
+| 7896523207643 | PDF #17 | PDF | ❌ NAO_ENCONTRADO | — | 383 ms |  |
+| 7891058021740 | PDF #18 | PDF | ❌ NAO_ENCONTRADO | — | 382 ms |  |
+| 7891058021665 | PDF #19 | PDF | ❌ NAO_ENCONTRADO | — | 409 ms |  |
+| 7501843502926 | PDF #20 | PDF | ❌ NAO_ENCONTRADO | — | 339 ms |  |
+| 7891106916653 | PDF #21 | PDF | ❌ NAO_ENCONTRADO | — | 337 ms |  |
+| 7891106916660 | PDF #22 | PDF | ❌ NAO_ENCONTRADO | — | 387 ms |  |
+| 7891106916684 | PDF #23 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
+| 7891106916639 | PDF #24 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
+| 7896045115709 | PDF #25 | PDF | ⚠️ INDISPONIVEL | — | 407 ms | A API retornou erro HTTP 429. |
+| 7896045115686 | PDF #26 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
+| 7896094210127 | PDF #27 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
+| 7896094904682 | PDF #28 | PDF | ⚠️ INDISPONIVEL | — | 343 ms | A API retornou erro HTTP 429. |
+| 7896094918597 | PDF #29 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
+| 7896094931541 | PDF #30 | PDF | ⚠️ INDISPONIVEL | — | 338 ms | A API retornou erro HTTP 429. |
+| 7896523210797 | PDF #31 | PDF | ⚠️ INDISPONIVEL | — | 380 ms | A API retornou erro HTTP 429. |
+| 7891058021610 | PDF #32 | PDF | ⚠️ INDISPONIVEL | — | 366 ms | A API retornou erro HTTP 429. |
+| 7896026301374 | PDF #33 | PDF | ❌ NAO_ENCONTRADO | — | 379 ms |  |
+| 7891058021627 | PDF #34 | PDF | ❌ NAO_ENCONTRADO | — | 388 ms |  |
+| 7897947620933 | PDF #35 | PDF | ❌ NAO_ENCONTRADO | — | 376 ms |  |
+| 7897947620957 | PDF #36 | PDF | ❌ NAO_ENCONTRADO | — | 377 ms |  |
+| 7897947620940 | PDF #37 | PDF | ❌ NAO_ENCONTRADO | — | 376 ms |  |
+| 7896004720241 | PDF #38 | PDF | ❌ NAO_ENCONTRADO | — | 379 ms |  |
 | 7898040329761 | PDF #39 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
-| 7896045110667 | PDF #40 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
-| 17896045110664 | PDF #41 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896045110407 | PDF #42 | PDF | ⚠️ INDISPONIVEL | — | 343 ms | A API retornou erro HTTP 429. |
-| 17896045110404 | PDF #43 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 17896005809515 | PDF #44 | PDF | ⚠️ INDISPONIVEL | — | 355 ms | A API retornou erro HTTP 429. |
-| 17896045109750 | PDF #45 | PDF | ⚠️ INDISPONIVEL | — | 378 ms | A API retornou erro HTTP 429. |
-| 7896005809518 | PDF #46 | PDF | ⚠️ INDISPONIVEL | — | 1352 ms | A API retornou erro HTTP 429. |
-| 7896045109753 | PDF #47 | PDF | ⚠️ INDISPONIVEL | — | 338 ms | A API retornou erro HTTP 429. |
-| 17896045104496 | PDF #48 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896045104499 | PDF #49 | PDF | ❌ NAO_ENCONTRADO | — | 374 ms |  |
-| 7897947620445 | PDF #50 | PDF | ❌ NAO_ENCONTRADO | — | 338 ms |  |
-| 7897947617957 | PDF #51 | PDF | ❌ NAO_ENCONTRADO | — | 351 ms |  |
-| 7897947617940 | PDF #52 | PDF | ❌ NAO_ENCONTRADO | — | 378 ms |  |
-| 7897947612754 | PDF #53 | PDF | ❌ NAO_ENCONTRADO | — | 338 ms |  |
-| 7897947614734 | PDF #54 | PDF | ❌ NAO_ENCONTRADO | — | 342 ms |  |
-| 7897947621312 | PDF #55 | PDF | ⚠️ INDISPONIVEL | — | 352 ms | A API retornou erro HTTP 429. |
-| 7897947621336 | PDF #56 | PDF | ⚠️ INDISPONIVEL | — | 352 ms | A API retornou erro HTTP 429. |
-| 7897947621329 | PDF #57 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7897947619579 | PDF #58 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7897947601857 | PDF #59 | PDF | ⚠️ INDISPONIVEL | — | 373 ms | A API retornou erro HTTP 429. |
-| 7897947619593 | PDF #60 | PDF | ⚠️ INDISPONIVEL | — | 373 ms | A API retornou erro HTTP 429. |
-| 7897947620605 | PDF #61 | PDF | ⚠️ INDISPONIVEL | — | 377 ms | A API retornou erro HTTP 429. |
-| 7897947616882 | PDF #62 | PDF | ⚠️ INDISPONIVEL | — | 373 ms | A API retornou erro HTTP 429. |
-| 7897947600348 | PDF #63 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7897947621176 | PDF #64 | PDF | ⚠️ INDISPONIVEL | — | 339 ms | A API retornou erro HTTP 429. |
-| 7897947621756 | PDF #65 | PDF | ❌ NAO_ENCONTRADO | — | 338 ms |  |
-| 7897930777743 | PDF #66 | PDF | ❌ NAO_ENCONTRADO | — | 340 ms |  |
-| 7896523207919 | PDF #67 | PDF | ❌ NAO_ENCONTRADO | — | 339 ms |  |
-| 7896523201573 | PDF #68 | PDF | ❌ NAO_ENCONTRADO | — | 355 ms |  |
-| 7896004718460 | PDF #69 | PDF | ❌ NAO_ENCONTRADO | — | 377 ms |  |
-| 7896523201801 | PDF #70 | PDF | ❌ NAO_ENCONTRADO | — | 379 ms |  |
-| 7896523208022 | PDF #71 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7891058000295 | PDF #72 | PDF | ⚠️ INDISPONIVEL | — | 377 ms | A API retornou erro HTTP 429. |
-| 7896523216461 | PDF #73 | PDF | ⚠️ INDISPONIVEL | — | 341 ms | A API retornou erro HTTP 429. |
-| 7896523216454 | PDF #74 | PDF | ⚠️ INDISPONIVEL | — | 401 ms | A API retornou erro HTTP 429. |
-| 7896523206271 | PDF #75 | PDF | ⚠️ INDISPONIVEL | — | 353 ms | A API retornou erro HTTP 429. |
-| 7896523216478 | PDF #76 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896523216447 | PDF #77 | PDF | ⚠️ INDISPONIVEL | — | 389 ms | A API retornou erro HTTP 429. |
-| 7896523206806 | PDF #78 | PDF | ⚠️ INDISPONIVEL | — | 380 ms | A API retornou erro HTTP 429. |
-| 7896523200576 | PDF #79 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7896523227146 | PDF #80 | PDF | ⚠️ INDISPONIVEL | — | 338 ms | A API retornou erro HTTP 429. |
-| 7896523201740 | PDF #81 | PDF | ❌ NAO_ENCONTRADO | — | 340 ms |  |
-| 7896523206295 | PDF #82 | PDF | ❌ NAO_ENCONTRADO | — | 338 ms |  |
-| 7896523228150 | PDF #83 | PDF | ❌ NAO_ENCONTRADO | — | 337 ms |  |
-| 7896523220239 | PDF #84 | PDF | ❌ NAO_ENCONTRADO | — | 357 ms |  |
-| 7896004718453 | PDF #85 | PDF | ❌ NAO_ENCONTRADO | — | 393 ms |  |
-| 7898040328542 | PDF #86 | PDF | ❌ NAO_ENCONTRADO | — | 339 ms |  |
-| 7891058020316 | PDF #87 | PDF | ⚠️ INDISPONIVEL | — | 376 ms | A API retornou erro HTTP 429. |
-| 7896512959812 | PDF #88 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7896512945976 | PDF #89 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7896512945983 | PDF #90 | PDF | ⚠️ INDISPONIVEL | — | 378 ms | A API retornou erro HTTP 429. |
-| 7896512945990 | PDF #91 | PDF | ⚠️ INDISPONIVEL | — | 355 ms | A API retornou erro HTTP 429. |
-| 7896512946003 | PDF #92 | PDF | ⚠️ INDISPONIVEL | — | 384 ms | A API retornou erro HTTP 429. |
-| 7896512959867 | PDF #93 | PDF | ⚠️ INDISPONIVEL | — | 373 ms | A API retornou erro HTTP 429. |
-| 7896512954077 | PDF #94 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896512911988 | PDF #95 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7896512911971 | PDF #96 | PDF | ⚠️ INDISPONIVEL | — | 356 ms | A API retornou erro HTTP 429. |
-| 7896018751040 | PDF #97 | PDF | ❌ NAO_ENCONTRADO | — | 354 ms |  |
-| 7896018750845 | PDF #98 | PDF | ❌ NAO_ENCONTRADO | — | 373 ms |  |
-| 7896018750814 | PDF #99 | PDF | ❌ NAO_ENCONTRADO | — | 340 ms |  |
-| 7896018750876 | PDF #100 | PDF | ❌ NAO_ENCONTRADO | — | 397 ms |  |
-| 7896094930230 | PDF #101 | PDF | ❌ NAO_ENCONTRADO | — | 336 ms |  |
-| 7891142982100 | PDF #102 | PDF | ❌ NAO_ENCONTRADO | — | 355 ms |  |
-| 7896015520045 | PDF #103 | PDF | ⚠️ INDISPONIVEL | — | 339 ms | A API retornou erro HTTP 429. |
-| 7896015591106 | PDF #104 | PDF | ⚠️ INDISPONIVEL | — | 378 ms | A API retornou erro HTTP 429. |
-| 7896009419324 | PDF #105 | PDF | ⚠️ INDISPONIVEL | — | 354 ms | A API retornou erro HTTP 429. |
-| 7896512931849 | PDF #106 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7896311708314 | PDF #107 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896004791418 | PDF #108 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 5000456096652 | PDF #109 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7896044994817 | PDF #110 | PDF | ⚠️ INDISPONIVEL | — | 392 ms | A API retornou erro HTTP 429. |
-| 7896044994800 | PDF #111 | PDF | ⚠️ INDISPONIVEL | — | 377 ms | A API retornou erro HTTP 429. |
-| 7896044994794 | PDF #112 | PDF | ⚠️ INDISPONIVEL | — | 340 ms | A API retornou erro HTTP 429. |
-| 7896094930209 | PDF #113 | PDF | ❌ NAO_ENCONTRADO | — | 378 ms |  |
-| 7896004704999 | PDF #114 | PDF | ❌ NAO_ENCONTRADO | — | 377 ms |  |
-| 7896523207803 | PDF #115 | PDF | ❌ NAO_ENCONTRADO | — | 381 ms |  |
-| 7896523201887 | PDF #116 | PDF | ⚠️ INDISPONIVEL | — | 380 ms | A API retornou erro HTTP 429. |
-| 7896004782553 | PDF #117 | PDF | ⚠️ INDISPONIVEL | — | 359 ms | A API retornou erro HTTP 429. |
-| 7896004769196 | PDF #118 | PDF | ⚠️ INDISPONIVEL | — | 340 ms | A API retornou erro HTTP 429. |
-| 7896004715841 | PDF #119 | PDF | ⚠️ INDISPONIVEL | — | 339 ms | A API retornou erro HTTP 429. |
-| 7896004718446 | PDF #120 | PDF | ⚠️ INDISPONIVEL | — | 352 ms | A API retornou erro HTTP 429. |
-| 7896004715674 | PDF #121 | PDF | ⚠️ INDISPONIVEL | — | 348 ms | A API retornou erro HTTP 429. |
-| 7891058002916 | PDF #122 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7891058017507 | PDF #123 | PDF | ⚠️ INDISPONIVEL | — | 395 ms | A API retornou erro HTTP 429. |
-| 7891058020941 | PDF #124 | PDF | ⚠️ INDISPONIVEL | — | 338 ms | A API retornou erro HTTP 429. |
-| 7891058005474 | PDF #125 | PDF | ⚠️ INDISPONIVEL | — | 393 ms | A API retornou erro HTTP 429. |
-| 7891058003975 | PDF #126 | PDF | ⚠️ INDISPONIVEL | — | 338 ms | A API retornou erro HTTP 429. |
-| 7891058005948 | PDF #127 | PDF | ⚠️ INDISPONIVEL | — | 394 ms | A API retornou erro HTTP 429. |
-| 7891058003944 | PDF #128 | PDF | ⚠️ INDISPONIVEL | — | 353 ms | A API retornou erro HTTP 429. |
-| 7896094920910 | PDF #129 | PDF | ⚠️ INDISPONIVEL | — | 371 ms | A API retornou erro HTTP 429. |
-| 7896112402329 | PDF #130 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7896112402343 | PDF #131 | PDF | ⚠️ INDISPONIVEL | — | 354 ms | A API retornou erro HTTP 429. |
-| 7896112402558 | PDF #132 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7891058021528 | PDF #133 | PDF | ⚠️ INDISPONIVEL | — | 379 ms | A API retornou erro HTTP 429. |
-| 7896026300155 | PDF #134 | PDF | ⚠️ INDISPONIVEL | — | 383 ms | A API retornou erro HTTP 429. |
-| 5000456096638 | PDF #135 | PDF | ⚠️ INDISPONIVEL | — | 338 ms | A API retornou erro HTTP 429. |
-| 7891058016999 | PDF #136 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
-| 7891058017002 | PDF #137 | PDF | ⚠️ INDISPONIVEL | — | 338 ms | A API retornou erro HTTP 429. |
-| 7891058020286 | PDF #138 | PDF | ⚠️ INDISPONIVEL | — | 353 ms | A API retornou erro HTTP 429. |
-| 7898244720562 | PDF #139 | PDF | ⚠️ INDISPONIVEL | — | 389 ms | A API retornou erro HTTP 429. |
-| 7898040327910 | PDF #140 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896094931466 | PDF #141 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7896094931473 | PDF #142 | PDF | ⚠️ INDISPONIVEL | — | 376 ms | A API retornou erro HTTP 429. |
-| 7896004772332 | PDF #143 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7896004777535 | PDF #144 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7896523220352 | PDF #145 | PDF | ⚠️ INDISPONIVEL | — | 365 ms | A API retornou erro HTTP 429. |
-| 7896004777559 | PDF #146 | PDF | ⚠️ INDISPONIVEL | — | 390 ms | A API retornou erro HTTP 429. |
-| 7891106913799 | PDF #147 | PDF | ⚠️ INDISPONIVEL | — | 378 ms | A API retornou erro HTTP 429. |
-| 7898040325206 | PDF #148 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7898040329648 | PDF #149 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
-| 7898040329655 | PDF #150 | PDF | ⚠️ INDISPONIVEL | — | 372 ms | A API retornou erro HTTP 429. |
-| 7898040329587 | PDF #151 | PDF | ⚠️ INDISPONIVEL | — | 398 ms | A API retornou erro HTTP 429. |
-| 7898040329624 | PDF #152 | PDF | ⚠️ INDISPONIVEL | — | 355 ms | A API retornou erro HTTP 429. |
-| 7898040329693 | PDF #153 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
-| 7898040329679 | PDF #154 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7898040329600 | PDF #155 | PDF | ⚠️ INDISPONIVEL | — | 355 ms | A API retornou erro HTTP 429. |
-| 7898040329570 | PDF #156 | PDF | ⚠️ INDISPONIVEL | — | 604 ms | A API retornou erro HTTP 429. |
-| 5000456096591 | PDF #157 | PDF | ⚠️ INDISPONIVEL | — | 353 ms | A API retornou erro HTTP 429. |
-| 7896061997143 | PDF #158 | PDF | ⚠️ INDISPONIVEL | — | 333 ms | A API retornou erro HTTP 429. |
-| 7896061997136 | PDF #159 | PDF | ⚠️ INDISPONIVEL | — | 382 ms | A API retornou erro HTTP 429. |
-| 7896061996610 | PDF #160 | PDF | ⚠️ INDISPONIVEL | — | 381 ms | A API retornou erro HTTP 429. |
-| 7896061996603 | PDF #161 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
-| 7896061996627 | PDF #162 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7896061996832 | PDF #163 | PDF | ⚠️ INDISPONIVEL | — | 411 ms | A API retornou erro HTTP 429. |
-| 7898656391404 | PDF #164 | PDF | ⚠️ INDISPONIVEL | — | 393 ms | A API retornou erro HTTP 429. |
-| 7896007549719 | PDF #165 | PDF | ⚠️ INDISPONIVEL | — | 394 ms | A API retornou erro HTTP 429. |
-| 7896007551262 | PDF #166 | PDF | ⚠️ INDISPONIVEL | — | 356 ms | A API retornou erro HTTP 429. |
-| 7896007549726 | PDF #167 | PDF | ⚠️ INDISPONIVEL | — | 381 ms | A API retornou erro HTTP 429. |
-| 7896007551279 | PDF #168 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7896007553624 | PDF #169 | PDF | ⚠️ INDISPONIVEL | — | 393 ms | A API retornou erro HTTP 429. |
-| 7896007553617 | PDF #170 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7896007553648 | PDF #171 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7896007553655 | PDF #172 | PDF | ⚠️ INDISPONIVEL | — | 355 ms | A API retornou erro HTTP 429. |
-| 7898656391398 | PDF #173 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896094930315 | PDF #174 | PDF | ⚠️ INDISPONIVEL | — | 334 ms | A API retornou erro HTTP 429. |
-| 7896512920355 | PDF #175 | PDF | ⚠️ INDISPONIVEL | — | 378 ms | A API retornou erro HTTP 429. |
-| 7896007202638 | PDF #176 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
-| 7896007202621 | PDF #177 | PDF | ⚠️ INDISPONIVEL | — | 392 ms | A API retornou erro HTTP 429. |
-| 7896004817460 | PDF #178 | PDF | ⚠️ INDISPONIVEL | — | 338 ms | A API retornou erro HTTP 429. |
-| 7896004817774 | PDF #179 | PDF | ⚠️ INDISPONIVEL | — | 377 ms | A API retornou erro HTTP 429. |
-| 7896523206479 | PDF #180 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7896523223193 | PDF #181 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7896004701288 | PDF #182 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
-| 7896714200439 | PDF #183 | PDF | ⚠️ INDISPONIVEL | — | 376 ms | A API retornou erro HTTP 429. |
-| 7896714219301 | PDF #184 | PDF | ⚠️ INDISPONIVEL | — | 407 ms | A API retornou erro HTTP 429. |
-| 7896714260440 | PDF #185 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7896714219318 | PDF #186 | PDF | ⚠️ INDISPONIVEL | — | 376 ms | A API retornou erro HTTP 429. |
-| 7896523201665 | PDF #187 | PDF | ⚠️ INDISPONIVEL | — | 373 ms | A API retornou erro HTTP 429. |
-| 7898692300873 | PDF #188 | PDF | ⚠️ INDISPONIVEL | — | 340 ms | A API retornou erro HTTP 429. |
-| 37898692300874 | PDF #189 | PDF | ⚠️ INDISPONIVEL | — | 379 ms | A API retornou erro HTTP 429. |
-| 27898692300877 | PDF #190 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7898692300866 | PDF #191 | PDF | ⚠️ INDISPONIVEL | — | 339 ms | A API retornou erro HTTP 429. |
-| 27898692300860 | PDF #192 | PDF | ⚠️ INDISPONIVEL | — | 393 ms | A API retornou erro HTTP 429. |
-| 7897947621183 | PDF #193 | PDF | ⚠️ INDISPONIVEL | — | 376 ms | A API retornou erro HTTP 429. |
-| 7898930283210 | PDF #194 | PDF | ⚠️ INDISPONIVEL | — | 354 ms | A API retornou erro HTTP 429. |
-| 7898244720418 | PDF #195 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7898610373187 | PDF #196 | PDF | ⚠️ INDISPONIVEL | — | 352 ms | A API retornou erro HTTP 429. |
-| 7898610372975 | PDF #197 | PDF | ⚠️ INDISPONIVEL | — | 392 ms | A API retornou erro HTTP 429. |
-| 7898610377413 | PDF #198 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896523206929 | PDF #199 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
-| 7896004755519 | PDF #200 | PDF | ⚠️ INDISPONIVEL | — | 345 ms | A API retornou erro HTTP 429. |
-| 7897947601420 | PDF #201 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7897947606517 | PDF #202 | PDF | ⚠️ INDISPONIVEL | — | 339 ms | A API retornou erro HTTP 429. |
-| 7896512968739 | PDF #203 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7896512935540 | PDF #204 | PDF | ⚠️ INDISPONIVEL | — | 352 ms | A API retornou erro HTTP 429. |
-| 7896512927590 | PDF #205 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7896512927606 | PDF #206 | PDF | ⚠️ INDISPONIVEL | — | 376 ms | A API retornou erro HTTP 429. |
-| 7896512921369 | PDF #207 | PDF | ⚠️ INDISPONIVEL | — | 378 ms | A API retornou erro HTTP 429. |
-| 7897322707211 | PDF #208 | PDF | ⚠️ INDISPONIVEL | — | 338 ms | A API retornou erro HTTP 429. |
-| 7896523227573 | PDF #209 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7896523207704 | PDF #210 | PDF | ⚠️ INDISPONIVEL | — | 341 ms | A API retornou erro HTTP 429. |
-| 7896523202822 | PDF #211 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896523202204 | PDF #212 | PDF | ⚠️ INDISPONIVEL | — | 377 ms | A API retornou erro HTTP 429. |
-| 7896512914255 | PDF #213 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7896714273006 | PDF #214 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7896094210134 | PDF #215 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7896094208407 | PDF #216 | PDF | ⚠️ INDISPONIVEL | — | 376 ms | A API retornou erro HTTP 429. |
-| 7898430194238 | PDF #217 | PDF | ⚠️ INDISPONIVEL | — | 352 ms | A API retornou erro HTTP 429. |
-| 7898605845453 | PDF #218 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7896714275536 | PDF #219 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896714273549 | PDF #220 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7896714273532 | PDF #221 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7896714251080 | PDF #222 | PDF | ⚠️ INDISPONIVEL | — | 383 ms | A API retornou erro HTTP 429. |
-| 7891058002343 | PDF #223 | PDF | ⚠️ INDISPONIVEL | — | 357 ms | A API retornou erro HTTP 429. |
-| 7891058002336 | PDF #224 | PDF | ⚠️ INDISPONIVEL | — | 340 ms | A API retornou erro HTTP 429. |
-| 7896436906992 | PDF #225 | PDF | ⚠️ INDISPONIVEL | — | 358 ms | A API retornou erro HTTP 429. |
-| 7896094201637 | PDF #226 | PDF | ⚠️ INDISPONIVEL | — | 360 ms | A API retornou erro HTTP 429. |
-| 7898430193989 | PDF #227 | PDF | ⚠️ INDISPONIVEL | — | 345 ms | A API retornou erro HTTP 429. |
-| 7896714214405 | PDF #228 | PDF | ⚠️ INDISPONIVEL | — | 338 ms | A API retornou erro HTTP 429. |
-| 7898430194290 | PDF #229 | PDF | ⚠️ INDISPONIVEL | — | 392 ms | A API retornou erro HTTP 429. |
-| 7898430193484 | PDF #230 | PDF | ⚠️ INDISPONIVEL | — | 387 ms | A API retornou erro HTTP 429. |
-| 7896714221083 | PDF #231 | PDF | ⚠️ INDISPONIVEL | — | 379 ms | A API retornou erro HTTP 429. |
-| 7896004715902 | PDF #232 | PDF | ⚠️ INDISPONIVEL | — | 345 ms | A API retornou erro HTTP 429. |
-| 7896094921979 | PDF #233 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7896094999992 | PDF #234 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896094930735 | PDF #235 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896523224459 | PDF #236 | PDF | ⚠️ INDISPONIVEL | — | 372 ms | A API retornou erro HTTP 429. |
-| 7896004773957 | PDF #237 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
-| 7896714224688 | PDF #238 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7896004711195 | PDF #239 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
-| 7896523201399 | PDF #240 | PDF | ⚠️ INDISPONIVEL | — | 354 ms | A API retornou erro HTTP 429. |
-| 7896523208893 | PDF #241 | PDF | ⚠️ INDISPONIVEL | — | 649 ms | A API retornou erro HTTP 429. |
-| 7891058001155 | PDF #242 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7891058002565 | PDF #243 | PDF | ⚠️ INDISPONIVEL | — | 375 ms | A API retornou erro HTTP 429. |
-| 7891058015756 | PDF #244 | PDF | ⚠️ INDISPONIVEL | — | 334 ms | A API retornou erro HTTP 429. |
-| 7891058015787 | PDF #245 | PDF | ⚠️ INDISPONIVEL | — | 377 ms | A API retornou erro HTTP 429. |
-| 7891058464073 | PDF #246 | PDF | ⚠️ INDISPONIVEL | — | 394 ms | A API retornou erro HTTP 429. |
-| 7891058005566 | PDF #247 | PDF | ⚠️ INDISPONIVEL | — | 384 ms | A API retornou erro HTTP 429. |
-| 7891058022730 | PDF #248 | PDF | ⚠️ INDISPONIVEL | — | 374 ms | A API retornou erro HTTP 429. |
-| 7899941207523 | PDF #249 | PDF | ⚠️ INDISPONIVEL | — | 352 ms | A API retornou erro HTTP 429. |
-| 7896004716299 | PDF #250 | PDF | ⚠️ INDISPONIVEL | — | 340 ms | A API retornou erro HTTP 429. |
-| 7896004700038 | PDF #251 | PDF | ⚠️ INDISPONIVEL | — | 353 ms | A API retornou erro HTTP 429. |
-| 7896523209449 | PDF #252 | PDF | ⚠️ INDISPONIVEL | — | 366 ms | A API retornou erro HTTP 429. |
-| 7896523201689 | PDF #253 | PDF | ⚠️ INDISPONIVEL | — | 336 ms | A API retornou erro HTTP 429. |
-| 7896523201726 | PDF #254 | PDF | ⚠️ INDISPONIVEL | — | 338 ms | A API retornou erro HTTP 429. |
-| 7896523209432 | PDF #255 | PDF | ⚠️ INDISPONIVEL | — | 337 ms | A API retornou erro HTTP 429. |
-| 7896004703596 | PDF #256 | PDF | ⚠️ INDISPONIVEL | — | 392 ms | A API retornou erro HTTP 429. |
-| 7896523209364 | PDF #257 | PDF | ⚠️ INDISPONIVEL | — | 340 ms | A API retornou erro HTTP 429. |
-| 7896512904089 | PDF #258 | PDF | ⚠️ INDISPONIVEL | — | 346 ms | A API retornou erro HTTP 429. |
-| 7891142137135 | PDF #259 | PDF | ⚠️ INDISPONIVEL | — | 352 ms | A API retornou erro HTTP 429. |
-| 7896007202096 | PDF #260 | PDF | ❌ NAO_ENCONTRADO | — | 395 ms |  |
-| 7898430194849 | PDF #261 | PDF | ❌ NAO_ENCONTRADO | — | 382 ms |  |
-| 7898430195006 | PDF #262 | PDF | ❌ NAO_ENCONTRADO | — | 387 ms |  |
-| 7896512936028 | PDF #263 | PDF | ❌ NAO_ENCONTRADO | — | 386 ms |  |
-| 7896094917385 | PDF #264 | PDF | ❌ NAO_ENCONTRADO | — | 390 ms |  |
-| 7897322709376 | PDF #265 | PDF | ❌ NAO_ENCONTRADO | — | 383 ms |  |
-| 7896007553532 | PDF #266 | PDF | ⚠️ INDISPONIVEL | — | 384 ms | A API retornou erro HTTP 429. |
-| 7896007553525 | PDF #267 | PDF | ⚠️ INDISPONIVEL | — | 382 ms | A API retornou erro HTTP 429. |
-| 7896007554560 | PDF #268 | PDF | ⚠️ INDISPONIVEL | — | 381 ms | A API retornou erro HTTP 429. |
-| 7896007554553 | PDF #269 | PDF | ⚠️ INDISPONIVEL | — | 384 ms | A API retornou erro HTTP 429. |
-| 7896512900050 | PDF #270 | PDF | ⚠️ INDISPONIVEL | — | 392 ms | A API retornou erro HTTP 429. |
-| 7896512900043 | PDF #271 | PDF | ⚠️ INDISPONIVEL | — | 398 ms | A API retornou erro HTTP 429. |
-| 7896512900111 | PDF #272 | PDF | ⚠️ INDISPONIVEL | — | 386 ms | A API retornou erro HTTP 429. |
-| 7896512959829 | PDF #273 | PDF | ⚠️ INDISPONIVEL | — | 381 ms | A API retornou erro HTTP 429. |
-| 7896512936691 | PDF #274 | PDF | ⚠️ INDISPONIVEL | — | 386 ms | A API retornou erro HTTP 429. |
-| 7896512941947 | PDF #275 | PDF | ⚠️ INDISPONIVEL | — | 388 ms | A API retornou erro HTTP 429. |
-| 7896512935526 | PDF #276 | PDF | ❌ NAO_ENCONTRADO | — | 386 ms |  |
-| 7896512911865 | PDF #277 | PDF | ✅ OK | — | 388 ms | Linha Bebe Granado - Sabonete Em Barra |
-| 7896512911858 | PDF #278 | PDF | ✅ OK | — | 384 ms | Linha Bebe Granado - Sabonete Em Barra |
-| 7896512905420 | PDF #279 | PDF | ✅ OK | — | 385 ms | Linha Bebe Granado - Sabonete Em Barra |
-| 7896512911940 | PDF #280 | PDF | ❌ NAO_ENCONTRADO | — | 387 ms |  |
-| 7896512911933 | PDF #281 | PDF | ❌ NAO_ENCONTRADO | — | 383 ms |  |
-| 7896512904621 | PDF #282 | PDF | ⚠️ INDISPONIVEL | — | 384 ms | A API retornou erro HTTP 429. |
-| 7896018700741 | PDF #283 | PDF | ⚠️ INDISPONIVEL | — | 384 ms | A API retornou erro HTTP 429. |
-| 7896018700338 | PDF #284 | PDF | ⚠️ INDISPONIVEL | — | 381 ms | A API retornou erro HTTP 429. |
-| 7896512959836 | PDF #285 | PDF | ⚠️ INDISPONIVEL | — | 381 ms | A API retornou erro HTTP 429. |
-| 7896512941923 | PDF #286 | PDF | ⚠️ INDISPONIVEL | — | 383 ms | A API retornou erro HTTP 429. |
-| 7896512937988 | PDF #287 | PDF | ⚠️ INDISPONIVEL | — | 384 ms | A API retornou erro HTTP 429. |
-| 7896512937957 | PDF #288 | PDF | ⚠️ INDISPONIVEL | — | 383 ms | A API retornou erro HTTP 429. |
-| 7896512937919 | PDF #289 | PDF | ⚠️ INDISPONIVEL | — | 381 ms | A API retornou erro HTTP 429. |
-| 7896015560300 | PDF #290 | PDF | ⚠️ INDISPONIVEL | — | 690 ms | A API retornou erro HTTP 429. |
-| 7896015511159 | PDF #291 | PDF | ⚠️ INDISPONIVEL | — | 384 ms | A API retornou erro HTTP 429. |
-| 7896015517045 | PDF #292 | PDF | ❌ NAO_ENCONTRADO | — | 384 ms |  |
-| 7896015560331 | PDF #293 | PDF | ❌ NAO_ENCONTRADO | — | 382 ms |  |
-| 7896015518370 | PDF #294 | PDF | ❌ NAO_ENCONTRADO | — | 387 ms |  |
-| 7896015518486 | PDF #295 | PDF | ❌ NAO_ENCONTRADO | — | 385 ms |  |
-| 7896015518479 | PDF #296 | PDF | ❌ NAO_ENCONTRADO | — | 384 ms |  |
-| 7908335402854 | PDF #297 | PDF | ❌ NAO_ENCONTRADO | — | 387 ms |  |
-| 7896512959850 | PDF #298 | PDF | ⚠️ INDISPONIVEL | — | 377 ms | A API retornou erro HTTP 429. |
-| 7896512954060 | PDF #299 | PDF | ⚠️ INDISPONIVEL | — | 389 ms | A API retornou erro HTTP 429. |
-| 7896512914507 | PDF #300 | PDF | ⚠️ INDISPONIVEL | — | 391 ms | A API retornou erro HTTP 429. |
-| 7896512914262 | PDF #301 | PDF | ⚠️ INDISPONIVEL | — | 387 ms | A API retornou erro HTTP 429. |
-| 7896018751033 | PDF #302 | PDF | ⚠️ INDISPONIVEL | — | 385 ms | A API retornou erro HTTP 429. |
-| 7896018750838 | PDF #303 | PDF | ⚠️ INDISPONIVEL | — | 396 ms | A API retornou erro HTTP 429. |
-| 7896018750807 | PDF #304 | PDF | ⚠️ INDISPONIVEL | — | 385 ms | A API retornou erro HTTP 429. |
-| 7896018750869 | PDF #305 | PDF | ⚠️ INDISPONIVEL | — | 381 ms | A API retornou erro HTTP 429. |
-| 7896523212319 | PDF #306 | PDF | ⚠️ INDISPONIVEL | — | 382 ms | A API retornou erro HTTP 429. |
-| 7896015517090 | PDF #307 | PDF | ⚠️ INDISPONIVEL | — | 418 ms | A API retornou erro HTTP 429. |
-| 7896523209142 | PDF #308 | PDF | ❌ NAO_ENCONTRADO | — | 389 ms |  |
-| 17898692301990 | PDF #309 | PDF | ❌ NAO_ENCONTRADO | — | 392 ms |  |
-| 7898692301993 | PDF #310 | PDF | ❌ NAO_ENCONTRADO | — | 384 ms |  |
-| 7896094929814 | PDF #311 | PDF | ❌ NAO_ENCONTRADO | — | 614 ms |  |
-| 7896094929807 | PDF #312 | PDF | ❌ NAO_ENCONTRADO | — | 709 ms |  |
-| 7891058005467 | PDF #313 | PDF | ❌ NAO_ENCONTRADO | — | 411 ms |  |
-| 7896004701035 | PDF #314 | PDF | ⚠️ INDISPONIVEL | — | 388 ms | A API retornou erro HTTP 429. |
-| 7898430191244 | PDF #315 | PDF | ⚠️ INDISPONIVEL | — | 385 ms | A API retornou erro HTTP 429. |
-| 0000078911239 | PDF #316 | PDF | ⚠️ INDISPONIVEL | — | 383 ms | A API retornou erro HTTP 429. |
+| 7896045110667 | PDF #40 | PDF | ⚠️ INDISPONIVEL | — | 391 ms | A API retornou erro HTTP 429. |
+| 17896045110664 | PDF #41 | PDF | ⚠️ INDISPONIVEL | — | 342 ms | A API retornou erro HTTP 429. |
+| 7896045110407 | PDF #42 | PDF | ⚠️ INDISPONIVEL | — | 335 ms | A API retornou erro HTTP 429. |
+| 17896045110404 | PDF #43 | PDF | ⚠️ INDISPONIVEL | — | 342 ms | A API retornou erro HTTP 429. |
+| 17896005809515 | PDF #44 | PDF | ⚠️ INDISPONIVEL | — | 378 ms | A API retornou erro HTTP 429. |
+| 17896045109750 | PDF #45 | PDF | ⚠️ INDISPONIVEL | — | 377 ms | A API retornou erro HTTP 429. |
+| 7896005809518 | PDF #46 | PDF | ⚠️ INDISPONIVEL | — | 342 ms | A API retornou erro HTTP 429. |
+| 7896045109753 | PDF #47 | PDF | ⚠️ INDISPONIVEL | — | 387 ms | A API retornou erro HTTP 429. |
+| 17896045104496 | PDF #48 | PDF | ⚠️ INDISPONIVEL | — | 344 ms | A API retornou erro HTTP 429. |
+| 7896045104499 | PDF #49 | PDF | ❌ NAO_ENCONTRADO | — | 351 ms |  |
+| 7897947620445 | PDF #50 | PDF | ❌ NAO_ENCONTRADO | — | 382 ms |  |

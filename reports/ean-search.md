@@ -1,6 +1,6 @@
 # Relatório — `ean-search`
 
-_Gerado em 05/06/2026 12:53 por `tests/benchmark.py`._
+_Gerado em 08/06/2026 11:35 por `tests/benchmark.py`._
 
 ## Status: ⏭️ Não testado
 
