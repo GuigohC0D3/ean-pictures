@@ -114,9 +114,13 @@ function renderProduct(p) {
     productExtra.appendChild(li);
   });
 
-  productSource.textContent = p.from_cache
-    ? `Fonte: ${p.source} (cache)`
-    : `Fonte: ${p.source}`;
+  // Origem dos dados (+ origem da imagem, quando veio de fonte diferente).
+  let sourceText = `Fonte: ${p.source}`;
+  if (p.image_source && p.image_source !== p.source) {
+    sourceText += ` · Imagem: ${p.image_source}`;
+  }
+  if (p.from_cache) sourceText += " (cache)";
+  productSource.textContent = sourceText;
 
   productCard.hidden = false;
 }
@@ -212,6 +216,187 @@ document.querySelectorAll(".history-item").forEach((li) => {
     buscar(ean);
   });
 });
+
+/* ================================================================== *
+ * Abas (individual / lote)
+ * ================================================================== */
+const tabs = document.querySelectorAll(".tab");
+const panels = {
+  individual: document.getElementById("panel-individual"),
+  batch: document.getElementById("panel-batch"),
+};
+tabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    tabs.forEach((t) => t.classList.toggle("is-active", t === tab));
+    const target = tab.dataset.tab;
+    Object.entries(panels).forEach(([name, el]) => {
+      if (el) el.hidden = name !== target;
+    });
+  });
+});
+
+/* ================================================================== *
+ * Consulta em lote
+ * ================================================================== */
+const batchInput = document.getElementById("batch-input");
+const batchFile = document.getElementById("batch-file");
+const batchFileLabel = document.getElementById("batch-file-label");
+const batchProvider = document.getElementById("batch-provider");
+const batchBtn = document.getElementById("batch-btn");
+const batchSpinner = document.getElementById("batch-spinner");
+const batchMessage = document.getElementById("batch-message");
+const batchResults = document.getElementById("batch-results");
+const batchTbody = document.getElementById("batch-tbody");
+const batchSummaryText = document.getElementById("batch-summary-text");
+const exportCsvBtn = document.getElementById("export-csv");
+const exportXlsxBtn = document.getElementById("export-xlsx");
+
+// Guarda os EANs do último lote consultado (para exportar sem redigitar).
+let lastBatchEans = [];
+
+function setBatchLoading(loading) {
+  if (!batchBtn) return;
+  batchBtn.disabled = loading;
+  batchSpinner.hidden = !loading;
+  batchBtn.querySelector(".btn-label").textContent = loading
+    ? "Consultando..."
+    : "Consultar lote";
+}
+
+function showBatchMessage(text, type = "error") {
+  batchMessage.textContent = text;
+  batchMessage.className = `message ${type}`;
+  batchMessage.hidden = false;
+}
+
+function renderBatchResults(results, summary) {
+  batchTbody.replaceChildren();
+  results.forEach((r) => {
+    const tr = document.createElement("tr");
+    tr.className = r.found ? "row-found" : "row-missing";
+
+    // Imagem (miniatura ou placeholder visual).
+    const tdImg = document.createElement("td");
+    const img = document.createElement("img");
+    img.className = "batch-thumb";
+    img.alt = "";
+    const placeholder = buildPlaceholder(r);
+    img.src = safeImageUrl(r.image) || placeholder;
+    img.onerror = () => {
+      img.onerror = null;
+      img.src = placeholder;
+    };
+    tdImg.appendChild(img);
+
+    const tdEan = document.createElement("td");
+    tdEan.textContent = r.ean;
+
+    const tdName = document.createElement("td");
+    tdName.textContent = r.found ? r.name : (r.error || "Não encontrado");
+
+    const tdSource = document.createElement("td");
+    tdSource.textContent = r.source || "—";
+
+    const tdStatus = document.createElement("td");
+    const badge = document.createElement("span");
+    badge.className = `badge ${r.found ? "badge-ok" : "badge-fail"}`;
+    badge.textContent = r.found ? (r.image ? "OK + foto" : "OK") : "—";
+    tdStatus.appendChild(badge);
+
+    tr.append(tdImg, tdEan, tdName, tdSource, tdStatus);
+    batchTbody.appendChild(tr);
+  });
+
+  batchSummaryText.textContent =
+    `${summary.found}/${summary.total} encontrados · ` +
+    `${summary.with_image} com foto · ${summary.not_found} sem resultado`;
+  batchResults.hidden = false;
+}
+
+async function consultarLote() {
+  batchMessage.hidden = true;
+  batchResults.hidden = true;
+  setBatchLoading(true);
+
+  try {
+    let resp;
+    const provider = batchProvider ? batchProvider.value : "auto";
+
+    if (batchFile && batchFile.files.length > 0) {
+      // Upload de arquivo (multipart).
+      const fd = new FormData();
+      fd.append("file", batchFile.files[0]);
+      fd.append("provider", provider);
+      resp = await fetch("/api/batch", { method: "POST", body: fd });
+    } else {
+      const text = batchInput.value.trim();
+      if (!text) {
+        showBatchMessage("Cole EANs ou envie um arquivo.");
+        setBatchLoading(false);
+        return;
+      }
+      resp = await fetch("/api/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eans: text, provider }),
+      });
+    }
+
+    const data = await resp.json();
+    if (data.ok) {
+      lastBatchEans = data.results.map((r) => r.ean);
+      renderBatchResults(data.results, data.summary);
+      if (data.history) renderHistory(data.history);
+    } else {
+      showBatchMessage(data.error || "Falha na consulta em lote.");
+    }
+  } catch (err) {
+    showBatchMessage("Falha de conexão com o servidor.");
+  } finally {
+    setBatchLoading(false);
+  }
+}
+
+async function exportarLote(fmt) {
+  if (!lastBatchEans.length) {
+    showBatchMessage("Consulte um lote antes de exportar.");
+    return;
+  }
+  const provider = batchProvider ? batchProvider.value : "auto";
+  try {
+    const resp = await fetch(`/api/batch/export.${fmt}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eans: lastBatchEans, provider }),
+    });
+    if (!resp.ok) {
+      showBatchMessage("Não foi possível gerar o arquivo.");
+      return;
+    }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `produtos.${fmt}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    showBatchMessage("Falha ao baixar o arquivo.");
+  }
+}
+
+if (batchBtn) batchBtn.addEventListener("click", consultarLote);
+if (batchFile) {
+  batchFile.addEventListener("change", () => {
+    batchFileLabel.textContent = batchFile.files.length
+      ? `📎 ${batchFile.files[0].name}`
+      : "📎 Enviar PDF/CSV/XLSX";
+  });
+}
+if (exportCsvBtn) exportCsvBtn.addEventListener("click", () => exportarLote("csv"));
+if (exportXlsxBtn) exportXlsxBtn.addEventListener("click", () => exportarLote("xlsx"));
 
 // Limpar histórico (binding defensivo: só liga se o botão existir).
 if (clearHistoryBtn) {

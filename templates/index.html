@@ -18,37 +18,48 @@
       <p>Digite um código de barras e veja os dados e a imagem do produto.</p>
     </header>
 
-    <!-- Formulário de busca -->
-    <section class="search-card">
-      <form id="search-form" autocomplete="off">
-        <input
-          type="text"
-          id="ean-input"
-          inputmode="numeric"
-          placeholder="Ex.: 7891000100103"
-          aria-label="Código EAN"
-        />
-        <select id="provider-select" aria-label="Fonte de consulta">
-          <option value="auto">Todas (cascata)</option>
-          <option value="gtin">RSC GTIN</option>
-          <option value="openfoodfacts">Open Food Facts</option>
-          <option value="upcitemdb">UPCitemdb</option>
-          <option value="cosmos">Bluesoft Cosmos</option>
-          <option value="ean-db">EAN-DB</option>
-          <option value="ean-search">EAN-Search</option>
-        </select>
-        <button type="submit" id="search-btn">
-          <span class="btn-label">Buscar Produto</span>
-          <span class="spinner" id="spinner" hidden></span>
-        </button>
-      </form>
-      <p class="hint">Aceita EAN-8, EAN-13, UPC-A (12) e GTIN-14.</p>
-    </section>
+    <!-- Abas: individual x lote -->
+    <nav class="tabs" role="tablist">
+      <button type="button" class="tab is-active" data-tab="individual" role="tab">
+        Individual
+      </button>
+      <button type="button" class="tab" data-tab="batch" role="tab">
+        Em lote
+      </button>
+    </nav>
 
-    <!-- Área de mensagens (erros / status) -->
-    <div id="message" class="message" hidden></div>
+    <!-- ===================== PAINEL INDIVIDUAL ===================== -->
+    <div id="panel-individual" class="panel">
+      <!-- Formulário de busca -->
+      <section class="search-card">
+        <form id="search-form" autocomplete="off">
+          <input
+            type="text"
+            id="ean-input"
+            inputmode="numeric"
+            placeholder="Ex.: 7891000100103"
+            aria-label="Código EAN"
+          />
+          <select id="provider-select" aria-label="Fonte de consulta">
+            <option value="auto">Todas (cascata)</option>
+            <option value="gtin">RSC GTIN</option>
+            <option value="openfoodfacts">Open Food Facts</option>
+            <option value="upcitemdb">UPCitemdb</option>
+            <option value="cosmos">Bluesoft Cosmos</option>
+            <option value="ean-db">EAN-DB</option>
+            <option value="ean-search">EAN-Search</option>
+          </select>
+          <button type="submit" id="search-btn">
+            <span class="btn-label">Buscar Produto</span>
+            <span class="spinner" id="spinner" hidden></span>
+          </button>
+        </form>
+        <p class="hint">Aceita EAN-8, EAN-13, UPC-A (12) e GTIN-14.</p>
+      </section>
 
-    <main class="content">
+      <!-- Área de mensagens (erros / status) -->
+      <div id="message" class="message" hidden></div>
+
       <!-- Card do produto -->
       <section id="product-card" class="product-card" hidden>
         <div class="product-image">
@@ -62,7 +73,66 @@
           <span id="product-source" class="product-source"></span>
         </div>
       </section>
+    </div><!-- /panel-individual -->
 
+    <!-- ===================== PAINEL EM LOTE ===================== -->
+    <div id="panel-batch" class="panel" hidden>
+      <section class="search-card batch-card">
+        <label class="batch-label" for="batch-input">
+          Cole vários EANs (um por linha ou separados por espaço)
+        </label>
+        <textarea
+          id="batch-input"
+          rows="5"
+          placeholder="7891000100103&#10;3017620422003&#10;7894900011517"
+        ></textarea>
+
+        <div class="batch-controls">
+          <label class="file-btn">
+            <input type="file" id="batch-file" accept=".pdf,.csv,.xlsx,.xlsm,.txt" hidden />
+            <span id="batch-file-label">📎 Enviar PDF/CSV/XLSX</span>
+          </label>
+          <select id="batch-provider" aria-label="Fonte de consulta">
+            <option value="auto">Todas (cascata)</option>
+            <option value="gtin">RSC GTIN</option>
+            <option value="openfoodfacts">Open Food Facts</option>
+            <option value="upcitemdb">UPCitemdb</option>
+            <option value="cosmos">Bluesoft Cosmos</option>
+            <option value="ean-db">EAN-DB</option>
+            <option value="ean-search">EAN-Search</option>
+          </select>
+          <button type="button" id="batch-btn">
+            <span class="btn-label">Consultar lote</span>
+            <span class="spinner" id="batch-spinner" hidden></span>
+          </button>
+        </div>
+        <p class="hint">Extrai e valida os EANs automaticamente. Máx. 1000 por vez.</p>
+      </section>
+
+      <div id="batch-message" class="message" hidden></div>
+
+      <section id="batch-results" class="batch-results" hidden>
+        <div class="batch-summary">
+          <span id="batch-summary-text"></span>
+          <div class="batch-export">
+            <button type="button" id="export-csv" class="export-btn">⬇ CSV</button>
+            <button type="button" id="export-xlsx" class="export-btn">⬇ XLSX</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="batch-table">
+            <thead>
+              <tr>
+                <th>Imagem</th><th>EAN</th><th>Produto</th><th>Fonte</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="batch-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div><!-- /panel-batch -->
+
+    <main class="content">
       <!-- Histórico -->
       <aside class="history">
         <div class="history-header">
