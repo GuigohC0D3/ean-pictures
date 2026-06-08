@@ -22,8 +22,12 @@ nome, código, imagem e demais informações em uma interface moderna e responsi
 - ⏳ Indicador de carregamento durante a busca
 - 🧯 Tratamento de erros: EAN inválido, produto não encontrado e API indisponível
 - 🕑 Histórico das **últimas 10 consultas** (persistido em JSON)
-- ⚡ **Cache em memória** para evitar consultas repetidas
-- 🔌 Endpoint **REST** público: `GET /api/product/<ean>`
+- ⚡ **Cache em 2 camadas** (memória + SQLite em disco) — sobrevive a reinícios
+- 📦 **Consulta em lote**: cole vários EANs ou suba **PDF/CSV/XLSX** e exporte o resultado em **CSV/XLSX**
+- 🖼️ **Merge de imagem na cascata**: usa o nome do provedor preferido + a foto de outro
+- 🔍 **Fallback de imagem por nome** (Google CSE / SerpAPI) p/ produtos sem foto
+- 🔌 Endpoint **REST** público: `GET /api/product/<ean>` + `POST /api/batch`
+- 🐳 Pronto para **Docker + Gunicorn**
 - 📱 Interface responsiva (celular e desktop)
 
 ---
@@ -37,19 +41,27 @@ ean-pictures/
 ├── requirements.txt        # Dependências
 ├── README.md
 │
+├── Dockerfile              # Imagem de produção (Gunicorn)
+├── docker-compose.yml      # Orquestração + volume persistente
+│
 ├── services/
 │   ├── __init__.py
-│   └── ean_service.py      # Classe EANPicturesService (integração + cache + validação)
+│   ├── ean_service.py      # EANPicturesService (integração + cache + validação)
+│   ├── cache.py            # Cache persistente em SQLite (camada L2)
+│   └── batch.py            # Lote: extração de EANs + lookup paralelo + export
 │
 ├── static/
 │   ├── style.css           # Estilos (tema escuro, responsivo)
-│   └── script.js           # Lógica do front-end (fetch, loading, render)
+│   └── script.js           # Front-end (abas individual/lote, fetch, render)
 │
 ├── templates/
-│   └── index.html          # Página principal
+│   └── index.html          # Página principal (abas: individual e em lote)
+│
+├── tests/                  # pytest: service, batch, rotas + benchmark
 │
 └── data/
-    └── history.json        # Histórico persistido (criado automaticamente)
+    ├── history.json        # Histórico persistido (criado automaticamente)
+    └── cache.db            # Cache SQLite (criado automaticamente)
 ```
 
 ---
@@ -153,6 +165,28 @@ $env:EAN_API_TOKEN = "SEU_TOKEN_AQUI"
 python app.py
 ```
 
+### 🔍 Fallback de imagem por nome
+
+Quando a cascata acha o produto mas **sem foto**, o serviço pode procurar uma
+imagem por busca textual (marca + nome). Desligado por padrão; ative com um
+backend e suas credenciais:
+
+```powershell
+# Google Custom Search (100 buscas/dia grátis): crie a key e um "cx" com
+# "Buscar imagens" ligado em https://programmablesearchengine.google.com
+$env:IMAGE_SEARCH_PROVIDER = "google"
+$env:GOOGLE_CSE_KEY = "SUA_KEY"
+$env:GOOGLE_CSE_CX  = "SEU_CX"
+python app.py
+
+# Alternativa: SerpAPI
+$env:IMAGE_SEARCH_PROVIDER = "serpapi"
+$env:SERPAPI_KEY = "SUA_KEY"
+```
+
+A imagem encontrada fica salva no cache junto com o produto (não repete a busca)
+e o card mostra a origem em `image_source`.
+
 ---
 
 ## 🔌 Como consumir a API REST
@@ -186,6 +220,95 @@ Erros retornam o status HTTP adequado e um corpo com `error` e `code`:
 
 Retorna as últimas 10 consultas registradas (JSON).
 
+### `POST /api/batch`
+
+Consulta vários EANs de uma vez. Aceita **JSON** ou **upload de arquivo**:
+
+```bash
+# JSON (lista ou texto colado)
+curl -X POST http://localhost:5000/api/batch \
+  -H "Content-Type: application/json" \
+  -d '{"eans": ["7891000100103", "3017620422003"], "provider": "auto"}'
+
+# Upload de PDF/CSV/XLSX/TXT (extrai e valida os EANs do arquivo)
+curl -X POST http://localhost:5000/api/batch -F "file=@produtos.pdf"
+```
+
+Resposta: `{ ok, results[], summary{total,found,not_found,with_image}, history[] }`.
+
+### `POST /api/batch/export.{csv|xlsx}`
+
+Reconsulta uma lista de EANs e devolve um arquivo para download:
+
+```bash
+curl -X POST http://localhost:5000/api/batch/export.xlsx \
+  -H "Content-Type: application/json" \
+  -d '{"eans": ["7891000100103"]}' -o produtos.xlsx
+```
+
+---
+
+## 🧪 Testes
+
+```bash
+pip install -r requirements-dev.txt
+pytest -q
+```
+
+Cobrem validação de EAN, cache (memória + SQLite), cascata/merge de imagem,
+extração de EANs (texto/CSV) e todas as rotas Flask (serviço externo mockado).
+
+### Benchmark de cobertura (APIs ao vivo)
+
+`tests/benchmark.py` compara as fontes em produtos reais. Três modos:
+
+```bash
+# Cada API isolada (gera reports/<provedor>.md + _RESUMO.md) — padrão
+python tests/benchmark.py
+
+# Cascata completa (merge + fallback de imagem) — o caminho da app web
+python tests/benchmark.py --mode cascade
+
+# Roda os dois e mede o GANHO da cascata sobre os provedores isolados
+python tests/benchmark.py --mode both        # -> reports/_cascata.md
+```
+
+Úteis: `--pdf produtos.pdf` (usa EANs de um PDF), `-n 20` (limita), `-p cosmos`
+(só um provedor). O benchmark sempre usa cache em memória — mede chamadas ao vivo.
+
+**Rate limit (Cosmos/GTIN/EAN-Search):** esses provedores limitam por minuto.
+O benchmark processa os EANs em **páginas** (lotes) com pausa entre elas e faz
+**retry quando toma 429**, aplicado só a esses provedores:
+
+```bash
+# 30 EANs por página, 60s de descanso entre páginas, 2 retries de 60s
+python tests/benchmark.py --mode both --pdf produtos.pdf \
+  --page-size 30 --page-pause 60 --retries 2 --retry-wait 60
+```
+
+| Flag | Padrão | O que faz |
+|------|--------|-----------|
+| `--page-size N` | 30 | EANs por página (máx 90; `0` desliga a paginação) |
+| `--page-pause S` | 60 | segundos de descanso entre páginas |
+| `--retries N` | 2 | tentativas extras quando um EAN recebe 429 |
+| `--retry-wait S` | 60 | espera antes de cada retry |
+
+> ⚠️ Paginação resolve limite **por minuto**. Se a **cota diária** do tier grátis
+> já estourou (429 em toda chamada mesmo após a pausa), aguarde o reset ou rode
+> sem aquele provedor (ex.: `-p openfoodfacts -p gtin`).
+
+---
+
+## 🐳 Deploy com Docker
+
+```bash
+# build + run (Gunicorn na porta 8000, cache e histórico persistidos em ./data)
+docker compose up --build
+```
+
+Acesse **http://localhost:8000**. Configure tokens/provedores via `.env`
+(o `docker-compose.yml` já o carrega).
+
 ---
 
 ## 🧱 Arquitetura
@@ -208,12 +331,22 @@ Retorna as últimas 10 consultas registradas (JSON).
 
 ## 🔮 Possíveis melhorias futuras
 
-- Cache com **TTL / Redis** em vez de dicionário em memória.
+Já implementados:
+
+- ✅ Cache persistente em **SQLite** (TTL) além do dicionário em memória.
+- ✅ **Múltiplos provedores em cascata** (fallback automático) + merge de imagem.
+- ✅ Testes automatizados (`pytest`) para o service, o batch e os endpoints.
+- ✅ *Rate limiting* na API REST.
+- ✅ **Consulta em lote** (texto/PDF/CSV/XLSX) + export CSV/XLSX.
+- ✅ Deploy com **Gunicorn + Docker**.
+
+- ✅ **Fallback de imagem por nome** (Google CSE / SerpAPI) p/ os ~77% sem foto.
+
+Em aberto:
+
+- Cache distribuído (**Redis**) para múltiplas instâncias.
 - Paginação e busca por **nome do produto**, não só por EAN.
-- Suporte a **múltiplos provedores em cascata** (fallback automático).
-- Testes automatizados (`pytest`) para o service e os endpoints.
-- Autenticação e *rate limiting* na API REST.
+- Autenticação (API key) na API REST.
 - Internacionalização (i18n) da interface.
 - Histórico por usuário (banco de dados em vez de JSON).
-- Deploy com **Gunicorn + Docker**.
 ```
