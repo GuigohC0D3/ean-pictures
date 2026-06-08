@@ -1,0 +1,14 @@
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.git/
+.gitignore
+.env
+data/history.json
+data/cache.db
+reports/
+*.pdf
+.vscode/
+.idea/

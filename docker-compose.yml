@@ -1,0 +1,15 @@
+services:
+  ean-pictures:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # Garante o cache persistente no volume montado.
+      EAN_CACHE_BACKEND: sqlite
+      EAN_CACHE_PATH: /app/data/cache.db
+    volumes:
+      # Persiste histórico e cache entre reinícios do container.
+      - ./data:/app/data
+    restart: unless-stopped
