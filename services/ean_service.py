@@ -19,7 +19,13 @@ import logging
 import os
 import threading
 import time
+from pathlib import Path
+
 import requests
+
+from .cache import SqliteCache
+from .image_search import ImageSearcher
+from .image_search import from_env as _image_searcher_from_env
 
 # Logger do serviço. Por padrão fica silencioso (NullHandler); quem quiser ver
 # os logs (ex.: tests/benchmark.py) configura o handler/level.
@@ -101,6 +107,7 @@ class EANPicturesService:
         base_url: str | None = None,
         timeout: int = 10,
         cache_ttl: int | None = None,
+        image_searcher: ImageSearcher | None = None,
     ) -> None:
         # Configuração via parâmetros ou variáveis de ambiente.
         # `provider` aceita uma lista separada por vírgula -> fallback em cascata.
@@ -115,10 +122,32 @@ class EANPicturesService:
         self.cache_ttl = (
             cache_ttl if cache_ttl is not None else int(os.getenv("EAN_CACHE_TTL", "3600"))
         )
+        # Merge de imagem: na cascata, herda a foto de um provedor posterior
+        # mantendo os dados textuais do preferido. EAN_MERGE_IMAGE=0 desliga.
+        self.merge_image = os.getenv("EAN_MERGE_IMAGE", "1") != "0"
 
-        # Cache em memória: {ean: (produto_formatado, expira_em_epoch)}.
+        # Fallback de imagem por nome: quando o produto é achado SEM foto, busca
+        # uma imagem por texto (Google CSE / SerpAPI). None = desligado.
+        self.image_searcher = (
+            image_searcher if image_searcher is not None
+            else _image_searcher_from_env(self.timeout)
+        )
+
+        # Cache em memória (L1): {ean: (produto_formatado, expira_em_epoch)}.
         self._cache: dict[str, tuple[dict, float]] = {}
         self._lock = threading.Lock()
+
+        # Cache persistente (L2, opcional): sobrevive a reinícios do servidor.
+        # EAN_CACHE_BACKEND=memory desliga; sqlite (padrão) grava em disco.
+        # EAN_CACHE_PATH define o arquivo (padrão: data/cache.db ao lado do app).
+        self._pcache: SqliteCache | None = None
+        backend = os.getenv("EAN_CACHE_BACKEND", "sqlite").strip().lower()
+        if backend == "sqlite":
+            default_path = Path(__file__).resolve().parent.parent / "data" / "cache.db"
+            cache_path = os.getenv("EAN_CACHE_PATH", str(default_path))
+            if cache_path != ":memory:":
+                Path(cache_path).parent.mkdir(parents=True, exist_ok=True)
+            self._pcache = SqliteCache(cache_path, ttl=self.cache_ttl)
 
         # Cache do token do GTIN obtido via auto-login: (token, expira_em_epoch).
         # Renovado sob demanda (expirou) ou ao receber 401 da API.
@@ -213,8 +242,19 @@ class EANPicturesService:
                 last_unavailable = exc
                 continue
 
-            # Achou com imagem -> melhor resultado possível, retorna já.
+            # Achou com imagem.
             if product.get("image"):
+                # Se um provedor anterior (mais preferido) já trouxe os dados mas
+                # sem foto, mantém o nome/descrição dele e só herda a imagem deste
+                # — ex.: Cosmos dá o nome BR correto, Open Food Facts dá a foto.
+                if imageless is not None and self.merge_image:
+                    logger.info(
+                        "  [%s] tem imagem -> merge na ficha de %s",
+                        provider, imageless.get("source"),
+                    )
+                    merged = {**imageless, "image": product["image"]}
+                    merged["image_source"] = product.get("source")
+                    return merged
                 logger.info("  [%s] ACHOU com imagem -> usando (%s)", provider, product.get("name", "")[:40])
                 return product
             # Achou sem imagem -> guarda e segue tentando os próximos.
@@ -222,13 +262,38 @@ class EANPicturesService:
             if imageless is None:
                 imageless = product
 
-        # Nenhum provedor trouxe imagem; usa o primeiro achado (sem foto).
+        # Nenhum provedor trouxe imagem; usa o primeiro achado (sem foto) e,
+        # se houver searcher configurado, tenta achar uma imagem pelo nome.
         if imageless is not None:
-            return imageless
+            return self._with_image_fallback(imageless)
 
         if any_not_found:
             raise ProductNotFoundError(f"Produto não encontrado para o EAN {ean}.")
         raise last_unavailable or APIUnavailableError("Nenhum provedor respondeu.")
+
+    def _with_image_fallback(self, product: dict) -> dict:
+        """
+        Tenta preencher a imagem de um produto sem foto via busca por nome.
+
+        Monta a query com marca + nome (melhora a precisão) e devolve uma cópia
+        com 'image' e 'image_source' preenchidos quando encontra algo.
+        """
+        if self.image_searcher is None or product.get("image"):
+            return product
+
+        name = product.get("name") or ""
+        if not name or name == "Produto sem nome":
+            return product
+        brand = (product.get("extra") or {}).get("Marca") or ""
+        query = f"{brand} {name}".strip()
+
+        logger.info("  [image-search] buscando foto de '%s'", query[:60])
+        url = self.image_searcher.search(query)
+        if not url:
+            return product
+
+        logger.info("  [image-search] foto encontrada via %s", self.image_searcher.label)
+        return {**product, "image": url, "image_source": self.image_searcher.label}
 
     def _base_for(self, provider: str, is_first: bool) -> str:
         """Resolve a URL base de um provedor (env específica > override global > default)."""
@@ -801,21 +866,34 @@ class EANPicturesService:
     def _cache_get(self, ean: str) -> dict | None:
         with self._lock:
             entry = self._cache.get(ean)
-            if entry is None:
-                return None
-            product, expires_at = entry
-            # expires_at == 0 significa "sem expiração".
-            if expires_at and time.time() > expires_at:
-                del self._cache[ean]  # entrada expirada
-                return None
-            return product
+            if entry is not None:
+                product, expires_at = entry
+                # expires_at == 0 significa "sem expiração".
+                if expires_at and time.time() > expires_at:
+                    del self._cache[ean]  # entrada expirada
+                else:
+                    return product
+
+        # Miss no L1: tenta o cache persistente (L2) e promove para o L1.
+        if self._pcache is not None:
+            product = self._pcache.get(ean)
+            if product is not None:
+                expires_at = time.time() + self.cache_ttl if self.cache_ttl else 0
+                with self._lock:
+                    self._cache[ean] = (product, expires_at)
+                return product
+        return None
 
     def _cache_set(self, ean: str, product: dict) -> None:
         expires_at = time.time() + self.cache_ttl if self.cache_ttl else 0
         with self._lock:
             self._cache[ean] = (product, expires_at)
+        if self._pcache is not None:
+            self._pcache.set(ean, product)
 
     def clear_cache(self) -> None:
-        """Limpa o cache em memória (útil para testes)."""
+        """Limpa o cache em memória e o persistente (útil para testes)."""
         with self._lock:
             self._cache.clear()
+        if self._pcache is not None:
+            self._pcache.clear()
