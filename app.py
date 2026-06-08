@@ -35,6 +35,12 @@ from services import (
     InvalidEANError,
     ProductNotFoundError,
     APIUnavailableError,
+    extract_eans_from_file,
+    extract_eans_from_text,
+    lookup_batch,
+    results_to_csv,
+    results_to_xlsx,
+    summarize,
 )
 
 # --------------------------------------------------------------------------- #
@@ -49,7 +55,13 @@ HISTORY_LIMIT = 10
 RATE_LIMIT_MAX = int(os.getenv("RATE_LIMIT_MAX", "30"))
 RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))
 
+# Consulta em lote: paralelismo e tamanho máximo do upload (MB).
+BATCH_MAX_WORKERS = int(os.getenv("BATCH_MAX_WORKERS", "8"))
+MAX_UPLOAD_MB = int(os.getenv("MAX_UPLOAD_MB", "10"))
+
 app = Flask(__name__)
+# Limita o tamanho do corpo (upload de PDF/CSV/XLSX) — defesa contra abuso.
+app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
 service = EANPicturesService()
 
 # Lock para escrita concorrente no arquivo de histórico.
@@ -159,6 +171,12 @@ def clear_history() -> None:
 KNOWN_PROVIDERS = {"cosmos", "ean-db", "gtin", "upcitemdb", "openfoodfacts", "ean-search"}
 
 
+def _resolve_providers(provider: str | None) -> list[str] | None:
+    """Converte 'gtin' -> ['gtin']; 'auto'/desconhecido/vazio -> None (cascata)."""
+    p = (provider or "").strip().lower()
+    return [p] if p in KNOWN_PROVIDERS else None
+
+
 def consultar_produto(ean: str, provider: str | None = None) -> tuple[dict, int]:
     """
     Consulta o produto e devolve (payload, status_http).
@@ -262,6 +280,111 @@ def api_history_clear():
     """Limpa todo o histórico de consultas."""
     clear_history()
     return jsonify({"ok": True, "history": []}), 200
+
+
+# --------------------------------------------------------------------------- #
+# Consulta em lote (batch)
+# --------------------------------------------------------------------------- #
+@app.route("/api/batch", methods=["POST"])
+@rate_limited
+def api_batch():
+    """
+    Consulta vários EANs de uma vez.
+
+    Aceita JSON `{ "eans": [...] | "texto colado", "provider": "auto" }`
+    OU multipart com um arquivo em `file` (PDF/CSV/XLSX/TXT). Devolve os
+    resultados, um resumo agregado e os EANs que não passaram na validação.
+    """
+    provider = ""
+    eans: list[str] = []
+
+    upload = request.files.get("file")
+    if upload is not None:
+        provider = (request.form.get("provider", "") or "").strip().lower()
+        try:
+            eans = extract_eans_from_file(upload.filename or "", upload.read())
+        except RuntimeError as exc:  # dependência de leitura ausente
+            return jsonify({"ok": False, "error": str(exc), "code": "unsupported"}), 400
+    else:
+        payload = request.get_json(silent=True) or {}
+        provider = str(payload.get("provider", "")).strip().lower()
+        raw = payload.get("eans", "")
+        if isinstance(raw, list):
+            eans = extract_eans_from_text("\n".join(str(x) for x in raw))
+        else:
+            eans = extract_eans_from_text(str(raw))
+
+    if not eans:
+        return jsonify(
+            {"ok": False, "error": "Nenhum EAN válido encontrado.", "code": "empty"}
+        ), 400
+
+    providers = _resolve_providers(provider)
+    results = lookup_batch(service, eans, providers=providers, max_workers=BATCH_MAX_WORKERS)
+
+    # Registra no histórico os que foram encontrados (e não vieram do cache).
+    for r in results:
+        if r["found"] and not r["from_cache"]:
+            add_to_history(
+                {"ean": r["ean"], "name": r["name"], "image": r["image"]}
+            )
+
+    return jsonify(
+        {
+            "ok": True,
+            "results": results,
+            "summary": summarize(results),
+            "history": load_history(),
+        }
+    ), 200
+
+
+@app.route("/api/batch/export.<fmt>", methods=["POST"])
+@rate_limited
+def api_batch_export(fmt: str):
+    """
+    Reconsulta uma lista de EANs e devolve o resultado como CSV ou XLSX
+    para download. `fmt` ∈ {csv, xlsx}.
+    """
+    fmt = (fmt or "").lower()
+    if fmt not in ("csv", "xlsx"):
+        return jsonify({"error": "Formato inválido (use csv ou xlsx).", "code": "bad_format"}), 400
+
+    payload = request.get_json(silent=True) or {}
+    provider = str(payload.get("provider", "")).strip().lower()
+    raw = payload.get("eans", "")
+    eans = (
+        extract_eans_from_text("\n".join(str(x) for x in raw))
+        if isinstance(raw, list)
+        else extract_eans_from_text(str(raw))
+    )
+    if not eans:
+        return jsonify({"error": "Nenhum EAN válido informado.", "code": "empty"}), 400
+
+    providers = _resolve_providers(provider)
+    results = lookup_batch(service, eans, providers=providers, max_workers=BATCH_MAX_WORKERS)
+
+    if fmt == "csv":
+        body = results_to_csv(results)
+        resp = Response("﻿" + body, mimetype="text/csv; charset=utf-8")
+        resp.headers["Content-Disposition"] = "attachment; filename=produtos.csv"
+        return resp
+
+    body = results_to_xlsx(results)
+    resp = Response(
+        body,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    resp.headers["Content-Disposition"] = "attachment; filename=produtos.xlsx"
+    return resp
+
+
+@app.errorhandler(413)
+def too_large(_exc):
+    """Upload acima do MAX_CONTENT_LENGTH."""
+    return jsonify(
+        {"ok": False, "error": f"Arquivo acima de {MAX_UPLOAD_MB} MB.", "code": "too_large"}
+    ), 413
 
 
 # --------------------------------------------------------------------------- #
