@@ -58,6 +58,7 @@ except ModuleNotFoundError:
 
 from services.ean_service import (  # noqa: E402
     EANPicturesService,
+    InvalidEANError,
     ProductNotFoundError,
     APIUnavailableError,
 )
@@ -68,6 +69,18 @@ REPORTS_DIR = ROOT / "reports"
 DELAY_BETWEEN_CALLS = 1.2
 
 PROVIDERS = ["gtin", "cosmos", "ean-db", "upcitemdb", "openfoodfacts", "ean-search"]
+
+# Provedores que limitam POR MINUTO (free tier). Para eles, processamos os EANs
+# em "páginas" (lotes) com uma pausa entre elas, deixando a janela do rate limit
+# resetar — e tentamos de novo quando bate 429. (upcitemdb limita por DIA: pausar
+# não ajuda, então fica de fora.)
+RATE_LIMITED = {"cosmos", "gtin", "ean-search"}
+
+# Padrões da paginação anti-429 (configuráveis por CLI).
+PAGE_SIZE = 30        # itens por página (a "lista de 30")
+PAGE_PAUSE = 60       # segundos de descanso entre páginas
+RETRIES = 2           # tentativas extras quando um EAN toma 429
+RETRY_WAIT = 60       # segundos de espera antes de cada retry
 
 # Conjunto de teste: produtos populares e variados (foco: produto + imagem).
 # (ean, descrição, categoria)
@@ -119,18 +132,62 @@ def luhn_gtin_valid(ean: str) -> bool:
     return (10 - total % 10) % 10 == digits[-1]
 
 
-def run_provider(service: EANPicturesService, provider: str, eans: list[tuple[str, str, str]], delay: float) -> list[dict]:
+def _call_with_retry(fn, retries: int, wait: float):
+    """
+    Executa fn(); se tomar 429 (rate limit), espera `wait`s e tenta de novo,
+    até `retries` vezes. Outras falhas sobem na hora.
+    """
+    attempt = 0
+    while True:
+        try:
+            return fn()
+        except APIUnavailableError as exc:
+            if "429" in str(exc) and attempt < retries:
+                attempt += 1
+                log.warning("    ⏳ 429 (rate limit) — aguardando %ds e tentando de novo (%d/%d)",
+                            wait, attempt, retries)
+                time.sleep(wait)
+                continue
+            raise
+
+
+def _pause_for_page(idx: int, paged: bool, page_size: int, page_pause: float, delay: float) -> None:
+    """Entre páginas, descansa `page_pause`s; dentro da página, só o `delay` normal."""
+    if not idx:
+        return
+    if paged and idx % page_size == 0:
+        log.info("--- página de %d itens concluída; descansando %ds p/ o rate limit resetar ---",
+                 page_size, page_pause)
+        time.sleep(page_pause)
+    elif delay:
+        time.sleep(delay)
+
+
+def run_provider(
+    service: EANPicturesService,
+    provider: str,
+    eans: list[tuple[str, str, str]],
+    delay: float,
+    page_size: int = 0,
+    page_pause: float = 0,
+    retries: int = 0,
+    retry_wait: float = 0,
+) -> list[dict]:
     base_url = service._base_for(provider, is_first=False)
     total = len(eans)
-    log.info("=== provedor [%s] | %d EANs | delay %.1fs | base=%s ===", provider, total, delay, base_url or "(default)")
+    paged = page_size > 0 and provider in RATE_LIMITED
+    extra = f" | páginas de {page_size} (pausa {page_pause:.0f}s)" if paged else ""
+    log.info("=== provedor [%s] | %d EANs | delay %.1fs%s | base=%s ===",
+             provider, total, delay, extra, base_url or "(default)")
     results = []
     for idx, (ean, label, category) in enumerate(eans):
-        if idx and delay:
-            time.sleep(delay)
+        _pause_for_page(idx, paged, page_size, page_pause, delay)
         row: dict[str, object] = {"ean": ean, "label": label, "category": category}
         t0 = time.perf_counter()
         try:
-            product = service._fetch_one(provider, ean, base_url)
+            product = _call_with_retry(
+                lambda: service._fetch_one(provider, ean, base_url), retries, retry_wait
+            )
             row["status"] = "OK"
             row["name"] = product.get("name", "")
             row["has_image"] = bool(product.get("image"))
@@ -296,15 +353,186 @@ def write_summary(tested: list[dict], skipped: list[dict], eans: list[tuple[str,
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
+# --------------------------------------------------------------------------- #
+# Modo CASCATA (get_product completo: cascata + merge + fallback de imagem)
+# --------------------------------------------------------------------------- #
+def _img_origin(row: dict, searcher_label: str | None) -> str | None:
+    """Classifica de onde veio a imagem: provedor, merge (outro provedor) ou busca-nome."""
+    if not row["has_image"]:
+        return None
+    src = row.get("image_source") or ""
+    if not src:
+        return "provedor"
+    if searcher_label and src == searcher_label:
+        return "busca-nome"
+    return "merge"
+
+
+def run_cascade(
+    service: EANPicturesService,
+    eans: list[tuple[str, str, str]],
+    delay: float,
+    page_size: int = 0,
+    page_pause: float = 0,
+    retries: int = 0,
+    retry_wait: float = 0,
+) -> list[dict]:
+    """Roda a cascata completa (service.get_product) — o caminho que a app web usa."""
+    total = len(eans)
+    searcher = service.image_searcher.label if service.image_searcher else "off"
+    # Pagina se a cascata inclui algum provedor que limita por minuto.
+    paged = page_size > 0 and bool(set(service.providers) & RATE_LIMITED)
+    extra = f" | páginas de {page_size} (pausa {page_pause:.0f}s)" if paged else ""
+    log.info(
+        "=== modo CASCATA | %d EANs | cascata=%s | fallback-imagem=%s%s ===",
+        total, ",".join(service.providers), searcher, extra,
+    )
+    results = []
+    for idx, (ean, label, category) in enumerate(eans):
+        _pause_for_page(idx, paged, page_size, page_pause, delay)
+        row: dict[str, object] = {"ean": ean, "label": label, "category": category}
+        t0 = time.perf_counter()
+        try:
+            p = _call_with_retry(lambda: service.get_product(ean), retries, retry_wait)
+            row.update(
+                status="OK", name=p.get("name", ""), has_image=bool(p.get("image")),
+                source=p.get("source", ""), image_source=p.get("image_source", "") or "",
+            )
+        except InvalidEANError:
+            row.update(status="INVALIDO", name="", has_image=False, source="", image_source="")
+        except ProductNotFoundError:
+            row.update(status="NAO_ENCONTRADO", name="", has_image=False, source="", image_source="")
+        except APIUnavailableError as exc:
+            row.update(status="INDISPONIVEL", name=str(exc), has_image=False, source="", image_source="")
+        row["latency_ms"] = round((time.perf_counter() - t0) * 1000)
+        results.append(row)
+
+        icon = {"OK": "✅", "NAO_ENCONTRADO": "❌", "INDISPONIVEL": "⚠️", "INVALIDO": "🚫"}[row["status"]]
+        origin = _img_origin(row, service.image_searcher.label if service.image_searcher else None)
+        img = {"provedor": "🖼️", "merge": "🔀", "busca-nome": "🔍"}.get(origin, "  ")
+        log.info(
+            "[cascata] %3d/%d %-14s %s %s %4dms %s",
+            idx + 1, total, ean, icon, img, row["latency_ms"], (row["name"] or "")[:42],
+        )
+    found = sum(1 for r in results if r["status"] == "OK")
+    with_img = sum(1 for r in results if r["has_image"])
+    log.info("=== [cascata] fim: achou %d/%d | com imagem %d ===", found, total, with_img)
+    return results
+
+
+def write_cascade_report(
+    service: EANPicturesService,
+    results: list[dict],
+    union_map: dict[str, bool] | None,
+) -> None:
+    """Gera reports/_cascata.md com cobertura de imagem e origem das fotos."""
+    path = REPORTS_DIR / "_cascata.md"
+    total = len(results)
+    found = sum(1 for r in results if r["status"] == "OK")
+    with_img = sum(1 for r in results if r["has_image"])
+    rate = round(100 * with_img / total) if total else 0
+
+    label = service.image_searcher.label if service.image_searcher else None
+    origins = {"provedor": 0, "merge": 0, "busca-nome": 0}
+    for r in results:
+        o = _img_origin(r, label)
+        if o:
+            origins[o] += 1
+
+    lines = [
+        "# Cascata completa — produto + imagem (com merge e fallback)",
+        "",
+        f"_Gerado em {datetime.now():%d/%m/%Y %H:%M} por `tests/benchmark.py --mode cascade`._",
+        "",
+        f"Cascata: `{','.join(service.providers)}`  ·  "
+        f"Fallback de imagem: `{label or 'desligado'}`",
+        "",
+        "## Resumo",
+        "",
+        f"- **Encontrados:** {found}/{total}",
+        f"- **Com imagem:** {with_img}/{total}  (**{rate}%**) ← métrica principal",
+        "",
+        "### Origem da imagem",
+        "",
+        f"- 🖼️ Do próprio provedor: **{origins['provedor']}**",
+        f"- 🔀 De outro provedor (merge): **{origins['merge']}**",
+        f"- 🔍 Da busca por nome (fallback): **{origins['busca-nome']}**",
+        "",
+    ]
+
+    # Comparação com o teto sem fallback (união dos provedores isolados).
+    if union_map is not None:
+        ceiling = sum(1 for r in results if union_map.get(r["ean"]))
+        ceil_rate = round(100 * ceiling / total) if total else 0
+        gain = with_img - ceiling
+        lines += [
+            "## Ganho sobre os provedores isolados",
+            "",
+            f"- **Teto sem fallback** (algum provedor isolado tinha foto): "
+            f"{ceiling}/{total} ({ceil_rate}%)",
+            f"- **Cascata completa:** {with_img}/{total} ({rate}%)",
+            f"- **Ganho:** {'+' if gain >= 0 else ''}{gain} produtos "
+            f"({'+' if gain >= 0 else ''}{rate - ceil_rate} p.p.) — graças ao "
+            "merge + busca por nome.",
+            "",
+        ]
+
+    # Matriz por categoria.
+    categories = sorted({r["category"] for r in results})
+    cat_totals = {c: sum(1 for r in results if r["category"] == c) for c in categories}
+    lines += [
+        "## Imagem por categoria",
+        "",
+        "| Categoria | Com imagem |",
+        "|-----------|-----------|",
+    ]
+    for c in categories:
+        img = sum(1 for r in results if r["category"] == c and r["has_image"])
+        lines.append(f"| {c} | {img}/{cat_totals[c]} |")
+
+    # Detalhe por EAN.
+    lines += [
+        "",
+        "## Detalhe por EAN",
+        "",
+        "| EAN | Produto | Status | Fonte dados | Imagem | Latência |",
+        "|-----|---------|--------|-------------|--------|----------|",
+    ]
+    icon = {"OK": "✅", "NAO_ENCONTRADO": "❌", "INDISPONIVEL": "⚠️", "INVALIDO": "🚫"}
+    origin_tag = {"provedor": "🖼️ provedor", "merge": "🔀 merge", "busca-nome": "🔍 busca"}
+    for r in results:
+        o = _img_origin(r, label)
+        img = origin_tag.get(o, "—")
+        lines.append(
+            f"| {r['ean']} | {r['label']} | {icon[r['status']]} {r['status']} | "
+            f"{r.get('source') or '—'} | {img} | {r['latency_ms']} ms |"
+        )
+    lines.append("")
+    path.write_text("\n".join(lines), encoding="utf-8")
+    log.info("Relatório da cascata: %s", path)
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Benchmark das APIs de EAN, com logs em tempo real.")
     p.add_argument("--debug", action="store_true", help="logs DEBUG (mostra cada requisição HTTP)")
+    p.add_argument("--mode", choices=["providers", "cascade", "both"], default="providers",
+                   help="providers: cada API isolada (padrão) | cascade: cascata completa "
+                        "(merge + fallback de imagem) | both: roda os dois e compara")
     p.add_argument("--pdf", nargs="?", const="produtos.pdf", metavar="ARQ",
                    help="usa os EANs extraídos de um PDF (padrão: produtos.pdf)")
     p.add_argument("--provider", "-p", action="append", metavar="NOME",
                    help="testa só este(s) provedor(es) (repetível). Ex.: -p cosmos -p gtin")
     p.add_argument("--delay", type=float, default=DELAY_BETWEEN_CALLS,
                    help=f"pausa entre requisições em segundos (padrão: {DELAY_BETWEEN_CALLS})")
+    p.add_argument("--page-size", type=int, default=PAGE_SIZE, metavar="N",
+                   help=f"tamanho da página p/ provedores que limitam por minuto "
+                        f"(cosmos/gtin/ean-search). 0 desliga (padrão: {PAGE_SIZE}, máx 90)")
+    p.add_argument("--page-pause", type=float, default=PAGE_PAUSE, metavar="S",
+                   help=f"descanso entre páginas, em segundos (padrão: {PAGE_PAUSE})")
+    p.add_argument("--retries", type=int, default=RETRIES, metavar="N",
+                   help=f"tentativas extras quando um EAN toma 429 (padrão: {RETRIES})")
+    p.add_argument("--retry-wait", type=float, default=RETRY_WAIT, metavar="S",
+                   help=f"espera antes de cada retry, em segundos (padrão: {RETRY_WAIT})")
     p.add_argument("--limit", "-n", type=int, metavar="N",
                    help="limita aos N primeiros EANs (rodadas rápidas)")
     return p.parse_args(argv)
@@ -314,6 +542,9 @@ def main(argv: list[str] | None = None):
     args = parse_args(argv)
     setup_logging(args.debug)
     REPORTS_DIR.mkdir(exist_ok=True)
+    # Benchmark mede APIs AO VIVO: força cache em memória para o SQLite
+    # persistente não devolver resultados de rodadas anteriores.
+    os.environ["EAN_CACHE_BACKEND"] = "memory"
     service = EANPicturesService(cache_ttl=0)
 
     # Escolhe o conjunto de EANs: do PDF ou a lista padrão de produtos populares.
@@ -330,6 +561,13 @@ def main(argv: list[str] | None = None):
     providers = args.provider or PROVIDERS
     log.info("Provedores a testar: %s", ", ".join(providers))
 
+    # Limita a página a 90 (espelha o teto de per_page das APIs REST).
+    page_size = max(0, min(args.page_size, 90))
+    if page_size != args.page_size:
+        log.info("page-size ajustado para %d (máx 90).", page_size)
+    paging = dict(page_size=page_size, page_pause=args.page_pause,
+                  retries=args.retries, retry_wait=args.retry_wait)
+
     # Aviso de EANs com dígito verificador inválido (não atrapalha, só informa).
     invalid = [e for e, _, _ in eans if not luhn_gtin_valid(e)]
     if invalid:
@@ -337,30 +575,47 @@ def main(argv: list[str] | None = None):
 
     tested, skipped = [], []
     free = {"upcitemdb", "openfoodfacts"}
+    union_map: dict[str, bool] | None = None
 
-    for provider in providers:
-        if needs_token(service, provider):
-            env = service._PROVIDER_TOKEN_ENV[provider]
-            log.warning("[%s] PULADO — exige %s, não configurado.", provider, env)
-            write_report(provider, None, f"Provedor `{provider}` exige `{env}`, não configurado.")
-            skipped.append({"provider": provider, "reason": "requer token"})
-            continue
+    # ---- Modo por provedor (isolado) ----
+    if args.mode in ("providers", "both"):
+        for provider in providers:
+            if needs_token(service, provider):
+                env = service._PROVIDER_TOKEN_ENV[provider]
+                log.warning("[%s] PULADO — exige %s, não configurado.", provider, env)
+                write_report(provider, None, f"Provedor `{provider}` exige `{env}`, não configurado.")
+                skipped.append({"provider": provider, "reason": "requer token"})
+                continue
 
-        results = run_provider(service, provider, eans, args.delay)
-        write_report(provider, results, None)
-        ok_lat = [r["latency_ms"] for r in results if r["status"] in ("OK", "NAO_ENCONTRADO")]
-        tested.append(
-            {
-                "provider": provider,
-                "results": results,
-                "found": sum(1 for r in results if r["status"] == "OK"),
-                "with_img": sum(1 for r in results if r["has_image"]),
-                "avg_lat": round(sum(ok_lat) / len(ok_lat)) if ok_lat else 0,
-                "note": "grátis (sem token)" if provider in free else "",
-            }
-        )
+            results = run_provider(service, provider, eans, args.delay, **paging)
+            write_report(provider, results, None)
+            ok_lat = [r["latency_ms"] for r in results if r["status"] in ("OK", "NAO_ENCONTRADO")]
+            tested.append(
+                {
+                    "provider": provider,
+                    "results": results,
+                    "found": sum(1 for r in results if r["status"] == "OK"),
+                    "with_img": sum(1 for r in results if r["has_image"]),
+                    "avg_lat": round(sum(ok_lat) / len(ok_lat)) if ok_lat else 0,
+                    "note": "grátis (sem token)" if provider in free else "",
+                }
+            )
 
-    write_summary(tested, skipped, eans)
+        write_summary(tested, skipped, eans)
+
+        # Teto sem fallback: por EAN, algum provedor isolado trouxe imagem?
+        union_map = {e: False for e, _, _ in eans}
+        for s in tested:
+            for r in s["results"]:
+                if r["has_image"]:
+                    union_map[r["ean"]] = True
+
+    # ---- Modo cascata (caminho da app web: cascata + merge + fallback) ----
+    if args.mode in ("cascade", "both"):
+        cascade_results = run_cascade(service, eans, args.delay, **paging)
+        # Só compara com o teto quando rodamos os provedores na mesma execução.
+        write_cascade_report(service, cascade_results, union_map if args.mode == "both" else None)
+
     log.info("Relatórios gerados em: %s", REPORTS_DIR)
 
 
