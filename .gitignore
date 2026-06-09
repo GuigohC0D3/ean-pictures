@@ -15,6 +15,9 @@ data/cache.db
 # Testes
 .pytest_cache/
 
+# Logs de execução do benchmark (mantém a pasta, ignora os arquivos)
+logs/*.log
+
 # Editor / SO
 .vscode/
 .idea/

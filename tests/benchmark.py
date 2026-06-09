@@ -34,19 +34,32 @@ log = logging.getLogger("benchmark")
 
 def setup_logging(debug: bool) -> None:
     """
-    Configura logs em tempo real no stdout, com timestamp.
+    Configura logs em tempo real no stdout E num arquivo em logs/, com timestamp.
 
     INFO (padrão): progresso por EAN, decisões de cascata, login, imagem.
     DEBUG (--debug): inclui cada requisição HTTP (GET url -> status, bytes).
+
+    Cada execução grava um arquivo logs/benchmark_AAAA-MM-DD_HHMMSS.log
+    (o arquivo guarda sempre DEBUG, independentemente do nível do console).
     """
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)-7s %(name)s | %(message)s", "%H:%M:%S"))
-    level = logging.DEBUG if debug else logging.INFO
+    console = logging.StreamHandler(sys.stdout)
+    console.setFormatter(logging.Formatter("%(asctime)s %(levelname)-7s %(name)s | %(message)s", "%H:%M:%S"))
+    console.setLevel(logging.DEBUG if debug else logging.INFO)
+
+    logs_dir = ROOT / "logs"
+    logs_dir.mkdir(exist_ok=True)
+    log_path = logs_dir / f"benchmark_{datetime.now():%Y-%m-%d_%H%M%S}.log"
+    file_handler = logging.FileHandler(log_path, encoding="utf-8")
+    file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)-7s %(name)s | %(message)s", "%Y-%m-%d %H:%M:%S"))
+    file_handler.setLevel(logging.DEBUG)
+
     for name in ("benchmark", "ean_service"):
         lg = logging.getLogger(name)
-        lg.setLevel(level)
-        lg.handlers = [handler]
+        lg.setLevel(logging.DEBUG)
+        lg.handlers = [console, file_handler]
         lg.propagate = False
+
+    log.info("Log desta execução: %s", log_path.relative_to(ROOT))
 
 # Carrega tokens do .env (se python-dotenv estiver instalado).
 try:
@@ -612,6 +625,9 @@ def main(argv: list[str] | None = None):
 
     # ---- Modo cascata (caminho da app web: cascata + merge + fallback) ----
     if args.mode in ("cascade", "both"):
+        # --provider também define a cadeia da cascata (senão usa EAN_API_PROVIDER).
+        if args.provider:
+            service.providers = [p.strip().lower() for p in args.provider if p.strip()]
         cascade_results = run_cascade(service, eans, args.delay, **paging)
         # Só compara com o teto quando rodamos os provedores na mesma execução.
         write_cascade_report(service, cascade_results, union_map if args.mode == "both" else None)
