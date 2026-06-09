@@ -235,6 +235,10 @@ curl -X POST http://localhost:5000/api/batch -F "file=@produtos.pdf"
 ```
 
 Resposta: `{ ok, results[], summary{total,found,not_found,with_image}, history[] }`.
+Quando o arquivo é PDF, cada item de `results` também recebe
+`cosmos_image_url`, no formato
+`https://cdn-cosmos.bluesoft.com.br/products/{ean}`. A interface usa essa URL
+como alternativa quando os provedores consultados não retornam uma imagem.
 
 ### `POST /api/batch/export.{csv|xlsx}`
 

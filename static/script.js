@@ -281,7 +281,8 @@ function renderBatchResults(results, summary) {
     img.className = "batch-thumb";
     img.alt = "";
     const placeholder = buildPlaceholder(r);
-    img.src = safeImageUrl(r.image) || placeholder;
+    const imageUrl = r.image || r.cosmos_image_url;
+    img.src = safeImageUrl(imageUrl) || placeholder;
     img.onerror = () => {
       img.onerror = null;
       img.src = placeholder;
@@ -300,7 +301,9 @@ function renderBatchResults(results, summary) {
     const tdStatus = document.createElement("td");
     const badge = document.createElement("span");
     badge.className = `badge ${r.found ? "badge-ok" : "badge-fail"}`;
-    badge.textContent = r.found ? (r.image ? "OK + foto" : "OK") : "—";
+    badge.textContent = r.found
+      ? (r.image ? "OK + foto" : (r.cosmos_image_url ? "OK + URL Cosmos" : "OK"))
+      : "—";
     tdStatus.appendChild(badge);
 
     tr.append(tdImg, tdEan, tdName, tdSource, tdStatus);

@@ -1,5 +1,7 @@
 """Testes das rotas Flask (com o serviço externo mockado)."""
 
+import io
+
 import pytest
 
 import app as app_module
@@ -53,6 +55,35 @@ def test_api_batch_json(client, monkeypatch):
     assert body["ok"] is True
     assert body["summary"]["found"] == 1   # deduplicado
     assert body["results"][0]["ean"] == VALID
+
+
+def test_api_batch_pdf_inclui_url_da_cdn_cosmos(client, monkeypatch):
+    monkeypatch.setattr(app_module, "extract_eans_from_file", lambda *_args: [VALID])
+    monkeypatch.setattr(
+        app_module.service,
+        "get_product",
+        lambda ean, providers=None: {
+            "ean": ean,
+            "name": "Leite Moça",
+            "image": "",
+            "description": "leite",
+            "source": "OFF",
+            "from_cache": False,
+        },
+    )
+
+    resp = client.post(
+        "/api/batch",
+        data={"file": (io.BytesIO(b"%PDF-fake"), "produtos.pdf")},
+        content_type="multipart/form-data",
+    )
+
+    assert resp.status_code == 200
+    result = resp.get_json()["results"][0]
+    assert result["cosmos_image_url"] == (
+        f"https://cdn-cosmos.bluesoft.com.br/products/{VALID}"
+    )
+    assert result["image"] == ""
 
 
 def test_api_batch_vazio(client):

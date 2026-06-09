@@ -35,6 +35,7 @@ from services import (
     InvalidEANError,
     ProductNotFoundError,
     APIUnavailableError,
+    build_cosmos_product_image_url,
     extract_eans_from_file,
     extract_eans_from_text,
     lookup_batch,
@@ -293,18 +294,26 @@ def api_batch():
 
     Aceita JSON `{ "eans": [...] | "texto colado", "provider": "auto" }`
     OU multipart com um arquivo em `file` (PDF/CSV/XLSX/TXT). Devolve os
-    resultados, um resumo agregado e os EANs que não passaram na validação.
+    resultados e um resumo agregado. Para PDFs, inclui também a URL direta da
+    imagem na CDN da Cosmos para cada EAN extraído.
     """
     provider = ""
     eans: list[str] = []
+    cosmos_image_urls: dict[str, str] = {}
 
     upload = request.files.get("file")
     if upload is not None:
         provider = (request.form.get("provider", "") or "").strip().lower()
+        filename = upload.filename or ""
         try:
-            eans = extract_eans_from_file(upload.filename or "", upload.read())
+            eans = extract_eans_from_file(filename, upload.read())
         except RuntimeError as exc:  # dependência de leitura ausente
             return jsonify({"ok": False, "error": str(exc), "code": "unsupported"}), 400
+        if filename.lower().endswith(".pdf"):
+            cosmos_image_urls = {
+                ean: build_cosmos_product_image_url(ean)
+                for ean in eans
+            }
     else:
         payload = request.get_json(silent=True) or {}
         provider = str(payload.get("provider", "")).strip().lower()
@@ -321,6 +330,10 @@ def api_batch():
 
     providers = _resolve_providers(provider)
     results = lookup_batch(service, eans, providers=providers, max_workers=BATCH_MAX_WORKERS)
+    for result in results:
+        cosmos_url = cosmos_image_urls.get(result["ean"])
+        if cosmos_url:
+            result["cosmos_image_url"] = cosmos_url
 
     # Registra no histórico os que foram encontrados (e não vieram do cache).
     for r in results:
