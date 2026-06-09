@@ -1,6 +1,8 @@
 """Pacote de serviços de integração externa."""
 
 from .batch import (
+    build_cosmos_product_image_url,
+    extract_cosmos_image_urls_from_pdf,
     extract_eans_from_file,
     extract_eans_from_text,
     lookup_batch,
@@ -26,6 +28,8 @@ __all__ = [
     "APIUnavailableError",
     "SqliteCache",
     "ImageSearcher",
+    "build_cosmos_product_image_url",
+    "extract_cosmos_image_urls_from_pdf",
     "extract_eans_from_file",
     "extract_eans_from_text",
     "lookup_batch",

@@ -1,7 +1,12 @@
 """Testes do módulo de lote: extração de EANs, lookup paralelo e export."""
 
+import pytest
+
 from services import (
     EANPicturesService,
+    InvalidEANError,
+    build_cosmos_product_image_url,
+    extract_cosmos_image_urls_from_pdf,
     extract_eans_from_text,
     lookup_batch,
     results_to_csv,
@@ -33,6 +38,29 @@ def test_extrai_descarta_invalidos():
 def test_extrai_de_csv():
     data = f"nome,codigo\nLeite,{VALID_A}\nNutella,{VALID_B}\n".encode("utf-8")
     assert extract_eans_from_csv(data) == [VALID_A, VALID_B]
+
+
+def test_monta_url_de_imagem_cosmos():
+    assert build_cosmos_product_image_url(f"  {VALID_A}  ") == (
+        f"https://cdn-cosmos.bluesoft.com.br/products/{VALID_A}"
+    )
+
+
+def test_url_de_imagem_cosmos_rejeita_ean_invalido():
+    with pytest.raises(InvalidEANError):
+        build_cosmos_product_image_url("7891000100104")
+
+
+def test_extrai_urls_cosmos_do_pdf(monkeypatch):
+    monkeypatch.setattr(
+        "services.batch.extract_eans_from_pdf",
+        lambda _data: [VALID_A, VALID_B],
+    )
+
+    assert extract_cosmos_image_urls_from_pdf(b"pdf") == [
+        f"https://cdn-cosmos.bluesoft.com.br/products/{VALID_A}",
+        f"https://cdn-cosmos.bluesoft.com.br/products/{VALID_B}",
+    ]
 
 
 def test_lookup_batch_preserva_ordem(monkeypatch):

@@ -30,6 +30,7 @@ _EAN_RE = re.compile(r"(?<!\d)(\d{8}|\d{12,14})(?!\d)")
 
 # Limites defensivos para uploads.
 MAX_EANS = 1000
+COSMOS_PRODUCTS_BASE_URL = "https://cdn-cosmos.bluesoft.com.br/products"
 
 
 # --------------------------------------------------------------------------- #
@@ -68,6 +69,19 @@ def extract_eans_from_pdf(data: bytes) -> list[str]:
     reader = PdfReader(io.BytesIO(data))
     text = "\n".join((page.extract_text() or "") for page in reader.pages)
     return extract_eans_from_text(text)
+
+
+def build_cosmos_product_image_url(ean: str) -> str:
+    """Monta a URL direta da imagem de um produto na CDN da Cosmos."""
+    normalized = EANPicturesService.normalize_ean(ean)
+    if not EANPicturesService.is_valid_ean(normalized):
+        raise InvalidEANError(f"Código EAN inválido: {normalized!r}")
+    return f"{COSMOS_PRODUCTS_BASE_URL}/{normalized}"
+
+
+def extract_cosmos_image_urls_from_pdf(data: bytes) -> list[str]:
+    """Extrai EANs válidos de um PDF e gera uma URL Cosmos para cada um."""
+    return [build_cosmos_product_image_url(ean) for ean in extract_eans_from_pdf(data)]
 
 
 def extract_eans_from_csv(data: bytes) -> list[str]:
