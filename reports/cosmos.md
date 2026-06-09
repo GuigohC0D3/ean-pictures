@@ -1,20 +1,39 @@
 # Relatório — `cosmos`
 
-_Gerado em 08/06/2026 11:42 por `tests/benchmark.py`._
+_Gerado em 09/06/2026 09:51 por `tests/benchmark.py`._
 
 ## Resumo
 
-- **Encontrados:** 0/4
-- **Com imagem:** 0/4  (**0%**) ← métrica principal
-- **Latência média:** 0 ms
-
-> ⚠️ **4/4 consultas tomaram HTTP 429 (rate limit).** Os números estão subestimados; rode mais tarde para um resultado limpo.
+- **Encontrados:** 24/25
+- **Com imagem:** 6/25  (**24%**) ← métrica principal
+- **Latência média:** 482 ms
 
 ## Detalhe por EAN
 
 | EAN | Produto | Categoria | Status | Imagem | Latência | Nome retornado |
 |-----|---------|-----------|--------|--------|----------|----------------|
-| 3017620422003 | Nutella 400g | Alimento | ⚠️ INDISPONIVEL | — | 4055 ms | A API retornou erro HTTP 429. |
-| 5449000000996 | Coca-Cola lata 330ml | Bebida | ⚠️ INDISPONIVEL | — | 3022 ms | A API retornou erro HTTP 429. |
-| 8000500310427 | Kinder Bueno | Alimento | ⚠️ INDISPONIVEL | — | 2936 ms | A API retornou erro HTTP 429. |
-| 3046920022651 | Lindt Excellence 70% | Alimento | ⚠️ INDISPONIVEL | — | 2857 ms | A API retornou erro HTTP 429. |
+| 7896007550906 | PDF #1 | PDF | ✅ OK | 🖼️ sim | 730 ms | ABSORVENTE COM ABAS SECA INTIMUS NOTUR |
+| 7896007550890 | PDF #2 | PDF | ✅ OK | 🖼️ sim | 427 ms | ABSORVENTE COM ABAS SUAVE INTIMUS NOTU |
+| 7896007544059 | PDF #3 | PDF | ✅ OK | 🖼️ sim | 457 ms | ABSORVENTE COM ABAS SECA INTIMUS TRIPL |
+| 7896007544042 | PDF #4 | PDF | ✅ OK | 🖼️ sim | 351 ms | ABSORVENTE COM ABAS EXTRA SUAVE INTIMU |
+| 7896004708706 | PDF #5 | PDF | ✅ OK | — | 426 ms | ACETILCISTEÍNA LARANJA 200MG EMS CAIXA |
+| 7896004715292 | PDF #6 | PDF | ✅ OK | — | 418 ms | ACETILCISTEÍNA 20MG/ML FRAMBOESA EMS C |
+| 7896004713366 | PDF #7 | PDF | ✅ OK | — | 405 ms | XAROPE ACETILCISTEÍNA EXPECTORANTE 40M |
+| 7896004713342 | PDF #8 | PDF | ✅ OK | — | 407 ms | ACETILCISTEÍNA 600MG LARANJA EMS CAIXA |
+| 7896004710891 | PDF #9 | PDF | ✅ OK | — | 472 ms | ÁCIDO ACETILSALICÍLICO INFANTIL MORANG |
+| 7891142115492 | PDF #10 | PDF | ✅ OK | — | 631 ms | ALIVIUM INFANTIL FRUTAS 100MG/ML MANTE |
+| 7891058002589 | PDF #11 | PDF | ✅ OK | — | 637 ms | ALLEGRA PEDIATRICO 6MG/ML SUS OR FR 60 |
+| 7891058004354 | PDF #12 | PDF | ✅ OK | — | 723 ms | ALLEGRA FRAMBOESA 6MG/ML SANOFI CAIXA  |
+| 7891058004347 | PDF #13 | PDF | ✅ OK | — | 838 ms | ALLEGRA FRAMBOESA 6MG/ML SANOFI CAIXA  |
+| 7896523207681 | PDF #14 | PDF | ✅ OK | — | 371 ms | XAROPE AMBROXMEL 30MG/5ML EXPECTORANTE |
+| 7896523207667 | PDF #15 | PDF | ✅ OK | — | 809 ms | XAROPE AMBROXMEL PEDIÁTRICO 15MG/5ML E |
+| 7896523207636 | PDF #16 | PDF | ✅ OK | — | 561 ms | CLORIDRATO DE AMBROXOL 30MG/5ML EXPECT |
+| 7896523207643 | PDF #17 | PDF | ✅ OK | — | 361 ms | CLORIDRATO DE AMBROXOL 15MG/5ML EXPECT |
+| 7891058021740 | PDF #18 | PDF | ❌ NAO_ENCONTRADO | — | 389 ms |  |
+| 7891058021665 | PDF #19 | PDF | ✅ OK | — | 418 ms | DIPIRONA MONOIDRATADA DIPIRONA 500 MG  |
+| 7501843502926 | PDF #20 | PDF | ✅ OK | 🖼️ sim | 371 ms | KIT 1 APARELHO RECARREGÁVEL + 5 CARGAS |
+| 7891106916653 | PDF #21 | PDF | ✅ OK | — | 345 ms | ASPDIP 1G CX 10 COMP |
+| 7891106916660 | PDF #22 | PDF | ✅ OK | — | 349 ms | ASPDIP 500MG CX 10 COMP |
+| 7891106916684 | PDF #23 | PDF | ✅ OK | — | 342 ms | ASPDIP 500MG/ML SOL OR FR GOT 20ML |
+| 7891106916639 | PDF #24 | PDF | ✅ OK | — | 359 ms | PARACETAMOL 500MG COMPRIMIDO GENÉRICO  |
+| 7896045115709 | PDF #25 | PDF | ✅ OK | 🖼️ sim | 443 ms | BARRA PROTEICA 3 CORACOES CAP.CARA/SAL |
