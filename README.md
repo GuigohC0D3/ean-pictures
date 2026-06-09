@@ -280,6 +280,20 @@ python tests/benchmark.py --mode both        # -> reports/_cascata.md
 Úteis: `--pdf produtos.pdf` (usa EANs de um PDF), `-n 20` (limita), `-p cosmos`
 (só um provedor). O benchmark sempre usa cache em memória — mede chamadas ao vivo.
 
+### Benchmark direto da CDN Cosmos
+
+O benchmark separado abaixo testa as URLs
+`https://cdn-cosmos.bluesoft.com.br/products/{ean}` sem consultar a API Cosmos
+e sem sobrescrever os relatórios do benchmark original:
+
+```powershell
+.\venv\Scripts\python.exe tests\benchmark_cosmos_cdn.py --pdf produtos.pdf
+.\venv\Scripts\python.exe tests\benchmark_cosmos_cdn.py --pdf novos_produtos.pdf -n 20
+```
+
+O resultado é gravado em `reports/cosmos-cdn.md`. Uma URL só conta como imagem
+quando responde HTTP 200 e o corpo tem tipo ou assinatura binária de imagem.
+
 **Rate limit (Cosmos/GTIN/EAN-Search):** esses provedores limitam por minuto.
 O benchmark processa os EANs em **páginas** (lotes) com pausa entre elas e faz
 **retry quando toma 429**, aplicado só a esses provedores:
