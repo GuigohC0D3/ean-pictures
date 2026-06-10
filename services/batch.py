@@ -14,8 +14,12 @@ from __future__ import annotations
 
 import csv
 import io
+import logging
 import re
 from concurrent.futures import ThreadPoolExecutor
+from typing import Callable
+
+import requests
 
 from .ean_service import (
     APIUnavailableError,
@@ -24,6 +28,8 @@ from .ean_service import (
     ProductNotFoundError,
 )
 
+logger = logging.getLogger("ean_service")
+
 # Sequências de 8 a 14 dígitos (com possíveis separadores . - espaço no meio
 # são removidos antes). \b evita capturar pedaços de números maiores.
 _EAN_RE = re.compile(r"(?<!\d)(\d{8}|\d{12,14})(?!\d)")
@@ -31,6 +37,18 @@ _EAN_RE = re.compile(r"(?<!\d)(\d{8}|\d{12,14})(?!\d)")
 # Limites defensivos para uploads.
 MAX_EANS = 1000
 COSMOS_PRODUCTS_BASE_URL = "https://cdn-cosmos.bluesoft.com.br/products"
+COSMOS_BENCHMARK_USER_AGENT = "EAN-Pictures/1.0"
+
+# Assinaturas binárias dos formatos de imagem que a CDN costuma devolver.
+# A CDN responde 404 com um corpo HTML pequeno; conferir o conteúdo evita
+# anexar URLs que apontam para uma imagem inexistente (~27% dos EANs no benchmark).
+_IMAGE_MAGIC = (
+    b"\xff\xd8\xff",          # JPEG
+    b"\x89PNG\r\n\x1a\n",     # PNG
+    b"GIF87a",
+    b"GIF89a",
+    b"BM",                    # BMP
+)
 
 
 # --------------------------------------------------------------------------- #
@@ -82,6 +100,78 @@ def build_cosmos_product_image_url(ean: str) -> str:
 def extract_cosmos_image_urls_from_pdf(data: bytes) -> list[str]:
     """Extrai EANs válidos de um PDF e gera uma URL Cosmos para cada um."""
     return [build_cosmos_product_image_url(ean) for ean in extract_eans_from_pdf(data)]
+
+
+def _looks_like_image(content: bytes, content_type: str) -> bool:
+    """Confere se a resposta é mesmo uma imagem (header ou assinatura binária)."""
+    if not content:
+        return False
+    if content_type.split(";")[0].strip().lower().startswith("image/"):
+        return True
+    if content.startswith(_IMAGE_MAGIC):
+        return True
+    return content.startswith(b"RIFF") and content[8:12] == b"WEBP"
+
+
+def cosmos_image_url_if_available(
+    ean: str,
+    *,
+    timeout: float = 6,
+    fetch: Callable[..., object] = requests.get,
+) -> str | None:
+    """
+    Devolve a URL da imagem Cosmos só se ela existir de fato; senão, None.
+
+    A CDN responde 404 (ou 200 com corpo minúsculo) para EANs sem foto, então
+    não basta montar a URL: validamos a resposta antes de oferecê-la ao cliente.
+    Nunca levanta — em erro de rede/EAN inválido, devolve None.
+    """
+    try:
+        url = build_cosmos_product_image_url(ean)
+    except InvalidEANError:
+        return None
+
+    try:
+        response = fetch(
+            url,
+            timeout=timeout,
+            headers={"User-Agent": COSMOS_BENCHMARK_USER_AGENT},
+            allow_redirects=True,
+            stream=True,
+        )
+        try:
+            if int(response.status_code) != 200:
+                return None
+            content_type = response.headers.get("Content-Type") or ""
+            # Lê só um trecho: imagens reais têm assinatura nos primeiros bytes,
+            # e o corpo de 404 da CDN é pequeno o bastante para caber aqui.
+            chunk = response.raw.read(512) if response.raw else (response.content or b"")[:512]
+        finally:
+            response.close()
+    except requests.RequestException as exc:
+        logger.warning("  [cosmos-cdn] falha ao validar %s: %s", ean, exc)
+        return None
+
+    return url if _looks_like_image(chunk, content_type) else None
+
+
+def resolve_cosmos_image_urls(
+    eans: list[str],
+    *,
+    timeout: float = 6,
+    max_workers: int = 8,
+    fetch: Callable[..., object] = requests.get,
+) -> dict[str, str]:
+    """Valida em paralelo e devolve {ean: url} apenas para os que têm imagem."""
+    if not eans:
+        return {}
+    workers = max(1, min(max_workers, len(eans)))
+
+    def resolve(ean: str) -> tuple[str, str | None]:
+        return ean, cosmos_image_url_if_available(ean, timeout=timeout, fetch=fetch)
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        return {ean: url for ean, url in pool.map(resolve, eans) if url}
 
 
 def extract_eans_from_csv(data: bytes) -> list[str]:

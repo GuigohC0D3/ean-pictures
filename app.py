@@ -35,7 +35,7 @@ from services import (
     InvalidEANError,
     ProductNotFoundError,
     APIUnavailableError,
-    build_cosmos_product_image_url,
+    resolve_cosmos_image_urls,
     extract_eans_from_file,
     extract_eans_from_text,
     lookup_batch,
@@ -310,10 +310,11 @@ def api_batch():
         except RuntimeError as exc:  # dependência de leitura ausente
             return jsonify({"ok": False, "error": str(exc), "code": "unsupported"}), 400
         if filename.lower().endswith(".pdf"):
-            cosmos_image_urls = {
-                ean: build_cosmos_product_image_url(ean)
-                for ean in eans
-            }
+            # Só anexa a URL Cosmos quando a imagem existe de fato na CDN; EANs
+            # sem foto (404) são deixados de fora para não exibir links quebrados.
+            cosmos_image_urls = resolve_cosmos_image_urls(
+                eans, max_workers=BATCH_MAX_WORKERS
+            )
     else:
         payload = request.get_json(silent=True) or {}
         provider = str(payload.get("provider", "")).strip().lower()

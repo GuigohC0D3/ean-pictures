@@ -2,7 +2,9 @@
 
 from .batch import (
     build_cosmos_product_image_url,
+    cosmos_image_url_if_available,
     extract_cosmos_image_urls_from_pdf,
+    resolve_cosmos_image_urls,
     extract_eans_from_file,
     extract_eans_from_text,
     lookup_batch,
@@ -29,7 +31,9 @@ __all__ = [
     "SqliteCache",
     "ImageSearcher",
     "build_cosmos_product_image_url",
+    "cosmos_image_url_if_available",
     "extract_cosmos_image_urls_from_pdf",
+    "resolve_cosmos_image_urls",
     "extract_eans_from_file",
     "extract_eans_from_text",
     "lookup_batch",

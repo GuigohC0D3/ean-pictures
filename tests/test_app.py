@@ -57,7 +57,7 @@ def test_api_batch_json(client, monkeypatch):
     assert body["results"][0]["ean"] == VALID
 
 
-def test_api_batch_pdf_inclui_url_da_cdn_cosmos(client, monkeypatch):
+def _stub_pdf_product(monkeypatch):
     monkeypatch.setattr(app_module, "extract_eans_from_file", lambda *_args: [VALID])
     monkeypatch.setattr(
         app_module.service,
@@ -69,6 +69,18 @@ def test_api_batch_pdf_inclui_url_da_cdn_cosmos(client, monkeypatch):
             "description": "leite",
             "source": "OFF",
             "from_cache": False,
+        },
+    )
+
+
+def test_api_batch_pdf_inclui_url_da_cdn_cosmos(client, monkeypatch):
+    _stub_pdf_product(monkeypatch)
+    # Imagem existe na CDN: a URL deve ser anexada ao resultado.
+    monkeypatch.setattr(
+        app_module,
+        "resolve_cosmos_image_urls",
+        lambda eans, **_kw: {
+            VALID: f"https://cdn-cosmos.bluesoft.com.br/products/{VALID}"
         },
     )
 
@@ -84,6 +96,24 @@ def test_api_batch_pdf_inclui_url_da_cdn_cosmos(client, monkeypatch):
         f"https://cdn-cosmos.bluesoft.com.br/products/{VALID}"
     )
     assert result["image"] == ""
+
+
+def test_api_batch_pdf_omite_url_quando_imagem_nao_existe(client, monkeypatch):
+    _stub_pdf_product(monkeypatch)
+    # Imagem ausente na CDN (404): nenhuma URL deve ser anexada.
+    monkeypatch.setattr(
+        app_module, "resolve_cosmos_image_urls", lambda eans, **_kw: {}
+    )
+
+    resp = client.post(
+        "/api/batch",
+        data={"file": (io.BytesIO(b"%PDF-fake"), "produtos.pdf")},
+        content_type="multipart/form-data",
+    )
+
+    assert resp.status_code == 200
+    result = resp.get_json()["results"][0]
+    assert "cosmos_image_url" not in result
 
 
 def test_api_batch_vazio(client):
