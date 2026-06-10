@@ -27,9 +27,11 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from services import build_cosmos_product_image_url  # noqa: E402
+from services.ean_service import EANPicturesService  # noqa: E402
 from services.batch import (  # noqa: E402
     extract_eans_from_pdf,
 )
+from tests.sample_eans import SOURCES, all_eans  # noqa: E402
 
 REPORTS_DIR = ROOT / "reports"
 LOGS_DIR = ROOT / "logs"
@@ -198,7 +200,7 @@ def summarize(results: list[dict]) -> dict:
     }
 
 
-def write_report(pdf_path: Path, results: list[dict], output_path: Path) -> None:
+def write_report(source_label: str, results: list[dict], output_path: Path) -> None:
     """Grava um relatorio Markdown sem alterar os relatorios do benchmark antigo."""
     summary = summarize(results)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -209,7 +211,7 @@ def write_report(pdf_path: Path, results: list[dict], output_path: Path) -> None
         f"_Gerado em {datetime.now():%d/%m/%Y %H:%M} por "
         "`tests/benchmark_cosmos_cdn.py`._",
         "",
-        f"PDF: `{pdf_path.name}`",
+        f"Fonte: `{source_label}`",
         "",
         "## Resumo",
         "",
@@ -253,6 +255,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="PDF de onde extrair os EANs (padrao: produtos.pdf)",
     )
     parser.add_argument(
+        "--source",
+        choices=sorted(SOURCES),
+        metavar="FONTE",
+        help="usa uma lista curada de EANs em vez do PDF (ex.: globo)",
+    )
+    parser.add_argument(
         "--limit",
         "-n",
         type=int,
@@ -287,28 +295,37 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     log_path = setup_logging(args.debug)
 
-    pdf_path = Path(args.pdf)
-    if not pdf_path.is_absolute():
-        pdf_path = ROOT / pdf_path
-    if not pdf_path.is_file():
-        log.error("PDF nao encontrado: %s", pdf_path)
-        return 2
-
     output_path = Path(args.output)
     if not output_path.is_absolute():
         output_path = ROOT / output_path
 
-    eans = load_pdf_eans(pdf_path)
+    if args.source:
+        # Lista curada (ex.: drogaria-globo): filtra so os EANs com digito valido.
+        source_label = f"{args.source} (lista curada)"
+        eans = [
+            ean for ean in all_eans(args.source)
+            if EANPicturesService.is_valid_ean(ean)
+        ]
+    else:
+        pdf_path = Path(args.pdf)
+        if not pdf_path.is_absolute():
+            pdf_path = ROOT / pdf_path
+        if not pdf_path.is_file():
+            log.error("PDF nao encontrado: %s", pdf_path)
+            return 2
+        source_label = pdf_path.name
+        eans = load_pdf_eans(pdf_path)
+
     if args.limit is not None:
         eans = eans[: max(0, args.limit)]
     if not eans:
-        log.error("Nenhum EAN valido encontrado em %s.", pdf_path.name)
+        log.error("Nenhum EAN valido encontrado em %s.", source_label)
         return 1
 
     log.info(
         "Testando %d EANs de %s com %d workers.",
         len(eans),
-        pdf_path.name,
+        source_label,
         max(1, args.workers),
     )
     results = run_benchmark(
@@ -316,7 +333,7 @@ def main(argv: list[str] | None = None) -> int:
         timeout=max(0.1, args.timeout),
         workers=max(1, args.workers),
     )
-    write_report(pdf_path, results, output_path)
+    write_report(source_label, results, output_path)
 
     summary = summarize(results)
     log.info(
